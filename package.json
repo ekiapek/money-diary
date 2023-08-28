@@ -5,23 +5,36 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build && electron-builder",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
     "@braks/vue-flow": "0.4.38",
+    "@tiptap/core": "^2.1.7",
+    "@tiptap/pm": "^2.1.7",
     "@tiptap/starter-kit": "2.0.0-beta.192",
     "@tiptap/vue-3": "2.0.0-beta.97",
+    "@types/uuid": "^9.0.2",
+    "@vue/compiler-sfc": "^3.3.4",
     "apexcharts": "3.36.3",
     "date-fns": "^2.29.3",
+    "dayjs": "^1.11.9",
+    "knex": "^2.5.1",
     "lodash": "^4.17.21",
     "maska": "^1.5.0",
+    "pinia": "^2.1.6",
+    "postcss": "^8.4.28",
+    "sqlite3": "^5.1.6",
     "vite-plugin-vuetify": "1.0.2",
     "vue": "^3.2.47",
     "vue-router": "4.0.12",
-    "vue-tabler-icons": "2.31.0",
+    "vue-tabler-icons": "2.21.0",
     "vue3-apexcharts": "1.4.1",
     "vue3-perfect-scrollbar": "^1.6.1",
     "vuetify": "3.0.1",
+    "webpack": "^5.88.2",
+    "winston": "^3.10.0",
+    "winston-daily-rotate-file": "^4.7.1",
     "yup": "^0.32.11"
   },
   "devDependencies": {
