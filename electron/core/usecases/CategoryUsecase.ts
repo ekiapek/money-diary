@@ -1,4 +1,4 @@
-import { Category } from "../models/category";
+import { Category } from "../models/Category";
 import { ICategoryRepository } from "../repositories/interfaces/ICategoryRepository";
 import { ICategoryUsecase } from "./interfaces/ICategoryUsecase";
 
@@ -12,16 +12,19 @@ export class CategoryUsecase implements ICategoryUsecase {
         this.categoryRepository = categoryRepo;
     }
     
-    getAllCategories(): Promise<Category[]> {
-        return this.categoryRepository.getAll();
+    async getAllCategories(): Promise<Category[]> {
+        return await this.categoryRepository.getAll();
     }
-    getCategoryById(id: string): Promise<Category | undefined> {
-        return this.categoryRepository.getById(id);
+    async getCategoryById(id: string): Promise<Category | undefined> {
+        return await this.categoryRepository.getById(id);
     }
-    update(data: Category): Promise<boolean> {
-        return this.categoryRepository.update(data);
+    async update(data: Category): Promise<boolean> {
+        return await this.categoryRepository.update(data);
     }
-    insert(data: Category): Promise<boolean> {
-        return this.categoryRepository.insert(data);
+    async insert(data: Category): Promise<boolean> {
+        return await this.categoryRepository.insert(data);
+    }
+    async delete(id: string): Promise<boolean>{
+        return await this.categoryRepository.delete(id);
     }
 }

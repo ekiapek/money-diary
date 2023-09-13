@@ -4,9 +4,14 @@ import renderer from 'vite-plugin-electron-renderer'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from "url";
 import vuetify from "vite-plugin-vuetify";
+import { resolve } from 'node:path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  ssr:{
+    external: ["mock-aws-s3", "aws-sdk", "nock","uuid"],
+    target:'node'
+  },
   plugins: [
     vue(),
     vuetify({
@@ -17,6 +22,16 @@ export default defineConfig({
       {
         // Main-Process entry file of the Electron App.
         entry: 'electron/main.ts',
+        vite:{
+          resolve: {
+            alias: {
+               // Your other aliases if you have some
+              "aws-sdk": resolve(__dirname, 'src/main/empty.ts'),
+              "mock-aws-s3": resolve(__dirname, 'src/main/empty.ts'),
+              "nock": resolve(__dirname, 'src/main/empty.ts')
+            },
+          }
+        }
       },
       {
         entry: 'electron/preload.ts',
@@ -45,4 +60,9 @@ export default defineConfig({
       './src/**/*.vue',
     ],
   },
+  build:{
+    rollupOptions:{
+      external:["mock-aws-s3", "aws-sdk", "nock","uuid","crypto"]
+    }
+  }
 })

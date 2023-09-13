@@ -1,26 +1,72 @@
-import { Knex } from "knex";
-import { Transaction } from "../models/transaction";
+
+import { Transaction } from "../models/Transaction";
+import { JsonDB } from "../util/db/json";
+import { logger } from "../util/logging/winston";
 import { ITrasactionRepository } from "./interfaces/ITransactionRepository";
 
 export class TransactionRepository implements ITrasactionRepository{
-    private db: Knex;
+    private db: JsonDB;
+    private key = "transaction"
     /**
      *
      */
-    constructor(db: Knex) {
+    constructor(db: JsonDB) {
         this.db = db
     }
-    async getAll(): Promise<Transaction[]> {
-        throw new Error("Method not implemented.");
+    getAll(): Promise<Transaction[]> {
+        return new Promise((resolve, reject) => {
+            try {
+                let data = this.db.getData<Transaction>(this.key)
+                resolve(data);
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
-    async getById(id: string): Promise<Transaction|undefined> {
-        throw new Error("Method not implemented.");
+    getById(id: string): Promise<Transaction|undefined> {
+        return new Promise((resolve, reject) => {
+            try {
+                let data = this.db.getData<Transaction>(this.key).find(x => x.id === id);
+                resolve(data);
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
-    async insert(data: Transaction): Promise<boolean> {
-        throw new Error("Method not implemented.");
+    insert(data: Transaction): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.db.pushData<Transaction>(this.key, data);
+                this.db.persistData(this.key);
+                resolve(true);
+            } catch (error) {
+                logger.error(error);
+                reject(false);
+            }
+        });
     }
-    async update(data: Transaction): Promise<boolean> {
-        throw new Error("Method not implemented.");
+    update(data: Transaction): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.db.updateData(this.key, data);
+                this.db.persistData(this.key);
+                resolve(true);
+            } catch (error) {
+                logger.error(error);
+                reject(false);
+            }
+        });
     }
-    
+    delete(id: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.db.removeById(this.key, id);
+                this.db.persistData(this.key);
+                resolve(true);
+            } catch (error) {
+                logger.error(error);
+                reject(false);
+            }
+        });
+    }
 }

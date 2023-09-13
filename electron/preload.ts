@@ -1,3 +1,8 @@
+import { API } from "./core/handlers/api"
+import { contextBridge } from "electron"
+
+contextBridge.exposeInMainWorld("api",API);
+
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
   return new Promise(resolve => {
     if (condition.includes(document.readyState)) {

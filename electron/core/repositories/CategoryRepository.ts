@@ -1,51 +1,81 @@
-import type { Knex } from "knex";
-import { Category } from "../models/category";
+// import type { Knex } from "knex";
+import { JsonDB } from "../util/db/json";
+import { Category } from "../models/Category";
 import { ICategoryRepository } from "./interfaces/ICategoryRepository";
+import { logger } from "../util/logging/winston";
+
 
 export class CategoryRepository implements ICategoryRepository {
-    private db: Knex;
+    private db: JsonDB;
+
+    private key = "category";
     /**
      *
      */
-    constructor(db: Knex) {
+    constructor(db: JsonDB) {
         this.db = db;
     }
-    async getAll(): Promise<Category[]> {
-        return this.db<Category>("categories");
-    }
-    async getById(id: string): Promise<Category | undefined> {
-        return this.db<Category>("categories").where('id', id).first();
-    }
-    async update(data: Category): Promise<boolean> {
-        this.db("categories")
-            .where('id', data.id)
-            .update({
-                name: data.name,
-                description: data.description,
-                icon: data.icon,
-                color: data.color,
-                updatedAt: Date.now()
-            }).then(rows => {
-                if (!rows) return false;
-                return true
-            }).catch(err => { return false });
-        return false;
-    }
-    async insert(data: Category): Promise<boolean> {
-        this.db("categories").insert(
-            {
-                id: data.id,
-                name: data.name,
-                description: data.description,
-                icon: data.icon,
-                color: data.color,
-                createdAt: Date.now()
+
+    getAll(): Promise<Category[]> {
+        return new Promise((resolve, reject) => {
+            try {
+                let data = this.db.getData<Category>(this.key)
+                resolve(data);
+            } catch (error) {
+                reject(error);
             }
-        ).then(rows => {
-            if (!rows) return false;
-            return true
-        }).catch(err => { return false });
-        return false;
+        });
+
     }
 
+    getById(id: string): Promise<Category | undefined> {
+        return new Promise((resolve, reject) => {
+            try {
+                let data = this.db.getData<Category>(this.key).find(x => x.id === id);
+                resolve(data);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    update(data: Category): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.db.updateData(this.key, data);
+                this.db.persistData(this.key);
+                resolve(true);
+            } catch (error) {
+                logger.error(error);
+                reject(false);
+            }
+        });
+    }
+
+    insert(data: Category): Promise<boolean> {
+        console.log(data)
+        return new Promise((resolve, reject) => {
+            try {
+                this.db.pushData<Category>(this.key, data);
+                this.db.persistData(this.key);
+                resolve(true);
+            } catch (error) {
+                logger.error(error);
+                reject(false);
+            }
+        });
+    }
+
+    delete(id: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.db.removeById(this.key, id);
+                this.db.persistData(this.key);
+                resolve(true);
+            } catch (error) {
+                logger.error(error);
+                reject(false);
+            }
+        });
+    }
 }
