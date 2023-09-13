@@ -1,5 +1,5 @@
 import {
-    FileDollarIcon,WalletIcon,HomeIcon,PigMoneyIcon, ChartLineIcon
+    FileDollarIcon,WalletIcon,HomeIcon,PigMoneyIcon, ChartLineIcon, CategoryIcon
 } from 'vue-tabler-icons';
 
 export interface menu {
@@ -28,7 +28,7 @@ const sidebarItem: menu[] = [
     {
         title: 'Transactions',
         icon: FileDollarIcon,
-        to: ''
+        to: '/ui/typography'
     },
     // { header: 'wallets' },
     {
@@ -45,6 +45,11 @@ const sidebarItem: menu[] = [
         title: 'Financial Plan',
         icon: ChartLineIcon,
         to: ''
+    },
+    {
+        title: 'Manage Categories',
+        icon: CategoryIcon,
+        to: '/category'
     },
     // { header: 'utilities' },
     // {

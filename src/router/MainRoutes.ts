@@ -1,7 +1,7 @@
 const MainRoutes = {
     path: '/main',
     meta: {
-        requiresAuth: true
+        requiresAuth: true,
     },
     redirect: '/main',
     component: () => import('@/layouts/full/FullLayout.vue'),
@@ -9,7 +9,7 @@ const MainRoutes = {
         {
             name: 'Dashboard',
             path: '/',
-            component: () => import('@/views/dashboard/index.vue')
+            component: () => import('@/views/dashboard/index.vue'),
         },
         {
             name: 'Typography',
@@ -27,9 +27,9 @@ const MainRoutes = {
             component: () => import('@/views/pages/Icons.vue')
         },
         {
-            name: 'Starter',
-            path: '/sample-page',
-            component: () => import('@/views/pages/SamplePage.vue')
+            name: 'Category',
+            path: '/category',
+            component: () => import('@/views/pages/Category/Category.vue')
         },
     ]
 };
