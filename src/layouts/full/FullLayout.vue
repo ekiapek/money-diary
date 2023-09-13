@@ -4,9 +4,8 @@ import { RouterView } from 'vue-router';
 // import VerticalHeaderVue from './vertical-header/VerticalHeader.vue';
 import MainView from './Main.vue';
 </script>
-
 <template>
-    <v-locale-provider >
+    <v-locale-provider>
         <v-app>
             <!-- <VerticalSidebarVue />
             <VerticalHeaderVue  /> -->
@@ -14,7 +13,11 @@ import MainView from './Main.vue';
             <v-main>
                 <v-container fluid class="page-wrapper">
                     <div class="maxWidth">
-                        <RouterView />
+                        <RouterView v-slot="{ Component, route }">
+                            <transition name="slide-x-transition" mode="out-in">
+                                <component :is="Component" :key="route.path" />
+                            </transition>
+                        </RouterView>
                     </div>
                 </v-container>
             </v-main>
