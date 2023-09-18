@@ -34,7 +34,7 @@ const sidebarItem: menu[] = [
     {
         title: 'Wallets',
         icon: WalletIcon,
-        to: ''
+        to: '/wallet'
     },
     {
         title: 'Budget',

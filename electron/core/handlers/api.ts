@@ -3,6 +3,8 @@ import { ipcRenderer } from "electron";
 const listCategories = () => ipcRenderer.invoke("list:category");
 const listWallets = () => ipcRenderer.invoke("list:wallet");
 const listTransactions = () => ipcRenderer.invoke("list:transaction");
+const listCurrencies = () => ipcRenderer.invoke("list:currencies");
+const listWalletTypes = () => ipcRenderer.invoke("list:wallet-types");
 
 const getCategory = (categoryId:string) => ipcRenderer.invoke("get:category",categoryId);
 const getWallet = (walletId: string) => ipcRenderer.invoke("get:wallet",walletId);
@@ -24,6 +26,8 @@ export const API = {
     listCategories,
     listWallets,
     listTransactions,
+    listCurrencies,
+    listWalletTypes,
     getCategory,
     getWallet,
     getTransaction,

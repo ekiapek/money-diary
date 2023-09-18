@@ -18,6 +18,7 @@
     "@types/uuid": "^9.0.2",
     "@vue/compiler-sfc": "^3.3.4",
     "apexcharts": "3.42.0",
+    "currencies.json": "^1.0.2",
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.9",
     "emoji-regex": "^10.2.1",

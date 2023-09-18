@@ -10,7 +10,7 @@ import MainView from './Main.vue';
             <!-- <VerticalSidebarVue />
             <VerticalHeaderVue  /> -->
             <MainView />
-            <v-main>
+            <v-main class="bg-grey">
                 <v-container fluid class="page-wrapper">
                     <div class="maxWidth">
                         <RouterView v-slot="{ Component, route }">
@@ -24,3 +24,8 @@ import MainView from './Main.vue';
         </v-app>
     </v-locale-provider>
 </template>
+<style>
+.bg-grey{
+    background: rgb(var(--v-theme-grey100));
+}
+</style>

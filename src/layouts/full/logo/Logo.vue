@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import LogoDark from "./LogoDark.vue";
+import WheresMyMoney from "./WheresMyMoney.vue";
 
 
 
@@ -8,5 +8,5 @@ import LogoDark from "./LogoDark.vue";
 <template>
 
 
-  <LogoDark />
+  <WheresMyMoney/>
 </template>

@@ -9,6 +9,7 @@ import { WalletUsecase } from "../usecases/WalletUsecase";
 import { TransactionUsecase } from "../usecases/TransactionUsecase";
 import { Wallet } from "../models/Wallet";
 import { Transaction } from "../models/Transaction";
+import { WALLET_TYPES } from "../common/constants";
 
 
 const db = JsonDB.getInstance();
@@ -18,6 +19,7 @@ const transactionRepo = new TransactionRepository(db);
 const categoryUc = new CategoryUsecase(categoryRepo);
 const walletUc = new WalletUsecase(walletRepo);
 const transactionUc = new TransactionUsecase(transactionRepo);
+const currencies = require("currencies.json")
 
 ipcMain.handle("list:category", (event, args) => {
     return categoryUc.getAllCategories();
@@ -30,6 +32,14 @@ ipcMain.handle("list:wallet", (event,args) => {
 ipcMain.handle("list:transaction", (event,args) => {
     return transactionUc.getAllTransactions();
 });
+
+ipcMain.handle("list:currencies", (event,args) => {
+    return currencies.currencies;
+})
+
+ipcMain.handle("list:wallet-types",(event,args) => {
+    return WALLET_TYPES;
+})
 
 ipcMain.handle("get:category", (event, args) => {
     return categoryUc.getCategoryById(args); //args must be uuid string
@@ -57,7 +67,7 @@ ipcMain.handle("insert:wallet",(event,args) => {
         throw new Error("Empty argument");
     }
     let req = JSON.parse(args) as Wallet;
-    let model = new Wallet({name: req.name, description: req.description, icon: req.icon, color: req.color, createdAt: new Date()},req.balance);
+    let model = new Wallet({name: req.name, description: req.description, icon: req.icon, color: req.color, createdAt: new Date()},req.currency, Number(req.balance),req.type);
     return walletUc.insert(model);
 });
 

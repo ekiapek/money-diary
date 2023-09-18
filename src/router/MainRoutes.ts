@@ -31,6 +31,11 @@ const MainRoutes = {
             path: '/category',
             component: () => import('@/views/pages/Category/Category.vue')
         },
+        {
+            name: 'Wallet',
+            path: '/wallet',
+            component: () => import('@/views/pages/Wallet/Wallet.vue')
+        },
     ]
 };
 

@@ -4,10 +4,15 @@
       <h2 class="text-h2 mb-6 pl-7 pt-7 font-weight-bold" style="color: black; font-weight: bold;">
         Category</h2>
       <p class="mb-6 pl-7">Categorizing your cashflow can impact to better financial management!</p>
-      <v-card elevation="10" class="withbg" style='background: hsla(0, 0%, 100%, 1);background: linear-gradient(315deg, hsla(0, 0%, 100%, 1) 0%, hsla(0, 100%,
-      93%, 1) 100%);background: -moz-linear-gradient(315deg, hsla(0, 0%, 100%, 1) 0%, hsla(0, 100%, 93%, 1)
-      100%);background: -webkit-linear-gradient(315deg, hsla(0, 0%, 100%, 1) 0%, hsla(0, 100%, 93%, 1) 100%);filter:
-      progid: DXImageTransform.Microsoft.gradient( startColorstr="#FFFFFF", endColorstr="#FFDBDB", GradientType=1 );
+      <v-card elevation="10" class="withbg" style='background: hsla(210, 44%, 96%, 1);
+
+background: linear-gradient(315deg, hsla(210, 44%, 96%, 1) 0%, hsla(0, 100%, 93%, 1) 100%);
+
+background: -moz-linear-gradient(315deg, hsla(210, 44%, 96%, 1) 0%, hsla(0, 100%, 93%, 1) 100%);
+
+background: -webkit-linear-gradient(315deg, hsla(210, 44%, 96%, 1) 0%, hsla(0, 100%, 93%, 1) 100%);
+
+filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", endColorstr="#FFDBDB", GradientType=1 );
       margin-bottom: 2%;'>
         <v-card-item class="pa-0">
           <div class="d-sm-flex align-center justify-space-between">
@@ -41,7 +46,15 @@
 
 
       <v-card elevation="10" class="withbg"
-        style='background: hsla(0, 0%, 100%, 1);background: linear-gradient(315deg, hsla(0, 0%, 100%, 1) 0%, hsla(207, 100%, 93%, 1) 100%);background: -moz-linear-gradient(315deg, hsla(0, 0%, 100%, 1) 0%, hsla(207, 100%, 93%, 1) 100%);background: -webkit-linear-gradient(315deg, hsla(0, 0%, 100%, 1) 0%, hsla(207, 100%, 93%, 1) 100%);filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#FFFFFF", endColorstr="#DBEFFF", GradientType=1 );'>
+        style='background: hsla(210, 44%, 96%, 1);
+
+background: linear-gradient(315deg, hsla(210, 44%, 96%, 1) 0%, hsla(207, 100%, 93%, 1) 100%);
+
+background: -moz-linear-gradient(315deg, hsla(210, 44%, 96%, 1) 0%, hsla(207, 100%, 93%, 1) 100%);
+
+background: -webkit-linear-gradient(315deg, hsla(210, 44%, 96%, 1) 0%, hsla(207, 100%, 93%, 1) 100%);
+
+filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", endColorstr="#DBEFFF", GradientType=1 );'>
         <v-card-item class="pa-0">
           <div class="d-sm-flex align-center justify-space-between">
             <h5 class="text-h5 mb-6 pl-7 pt-7">Income Category</h5>
@@ -81,7 +94,7 @@
         <v-card-text class="">
           <v-container>
             <v-row class="mb-3">
-              <EmojiPicker :emoji="category.icon" :color=emojiColor @emojiChanged="onChangeEmoji" />
+              <EmojiPicker :emoji="category.icon" :color=pickerColor @emojiChanged="onChangeEmoji" />
               <ColorPicker class="mx-6" :colorProps="pickerColor" @colorChanged="onChangeColor" />
             </v-row>
           </v-container>
@@ -169,55 +182,54 @@ export default {
       this.pickerColor = item.color;
     },
     save() {
-      this.$refs.sendForm.validate();
-      if (!this.valid) {
-        return;
-      }
-      if (!this.category.createdAt) {
-        this.category.color = this.emojiColor ? this.emojiColor : this.pickerColor;
-        window.api.insertCategory(JSON.stringify(this.category)).then((response) => {
-          if (response) {
-            this.snackbarMsg = "Category added";
-            this.snackbarColor = "success";
-            this.snackbar = true;
-            this.loadData()
-          } else {
-            this.snackbarMsg = "Failed to add category";
-            this.snackbarColor = "error";
-            this.snackbar = true;
-          }
-        }).catch(() => {
-          this.snackbarMsg = "Failed to add category";
-          this.snackbarColor = "error"
-          this.snackbar = true;
-        });
+      this.$refs.sendForm.validate().then((result) => {
+        if (result.valid) {
+          if (!this.category.createdAt) {
+            this.category.color = this.pickerColor;
+            window.api.insertCategory(JSON.stringify(this.category)).then((response) => {
+              if (response) {
+                this.snackbarMsg = "Category added";
+                this.snackbarColor = "success";
+                this.snackbar = true;
+                this.loadData()
+              } else {
+                this.snackbarMsg = "Failed to add category";
+                this.snackbarColor = "error";
+                this.snackbar = true;
+              }
+            }).catch(() => {
+              this.snackbarMsg = "Failed to add category";
+              this.snackbarColor = "error"
+              this.snackbar = true;
+            });
 
-      } else {
-        this.category.color = this.emojiColor ? this.emojiColor : this.category.color;
-        window.api.updateCategory(JSON.stringify(this.category)).then((response) => {
-          if (response) {
-            this.snackbarMsg = "Successfully edited category";
-            this.snackbarColor = "success";
-            this.snackbar = true;
-            this.loadData()
           } else {
-            this.snackbarMsg = "Failed to edit category";
-            this.snackbarColor = "error";
-            this.snackbar = true;
+            this.category.color = this.pickerColor ? this.pickerColor : this.category.color;
+            window.api.updateCategory(JSON.stringify(this.category)).then((response) => {
+              if (response) {
+                this.snackbarMsg = "Successfully edited category";
+                this.snackbarColor = "success";
+                this.snackbar = true;
+                this.loadData()
+              } else {
+                this.snackbarMsg = "Failed to edit category";
+                this.snackbarColor = "error";
+                this.snackbar = true;
+              }
+            }).catch(() => {
+              this.snackbarMsg = "Failed to edit category";
+              this.snackbarColor = "error"
+              this.snackbar = true;
+            });
           }
-        }).catch(() => {
-          this.snackbarMsg = "Failed to edit category";
-          this.snackbarColor = "error"
-          this.snackbar = true;
-        });
-      }
-      this.categoryDialog = false
+          this.categoryDialog = false
+        }
+      });
     },
     deleteObj() {
       if (confirm("Delete this category?")) {
         window.api.deleteCategory(this.category.id).then((success) => {
           if (success) {
-            console.log(this.category.id)
             this.snackbarMsg = "Deleted category";
             this.snackbarColor = "success";
             this.snackbar = true;
@@ -229,7 +241,6 @@ export default {
             this.snackbar = true;
           }
         }).catch((error) => {
-          console.log(error)
           this.snackbarMsg = "Failed to delete category";
           this.snackbarColor = "error";
           this.snackbar = true;
@@ -237,7 +248,7 @@ export default {
       }
     },
     onChangeColor(newColor) {
-      this.emojiColor = newColor;
+      this.pickerColor = newColor;
     },
     onChangeEmoji(newEmoji) {
       this.category.icon = newEmoji;
