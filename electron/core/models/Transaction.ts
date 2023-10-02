@@ -1,25 +1,22 @@
 import UUID, {UUIDConstructor} from "pure-uuid"
 import { Base } from "./Base";
+import { Category } from "./Category";
+import { Wallet } from "./Wallet";
 
 export class Transaction {
     id: string;
-    name: string;
     description: string;
-    icon: string;
-    color: string;
     amount: number;
     type: number;
     walletId: string;
     categoryId: string;
+    transactionDate: Date;
     createdAt: Date;
     updatedAt?: Date;
     isDeleted?: boolean;
 
-    constructor(base: Base, amount: number, type: number, walletId: string, categoryId: string) {
-        this.name = base.name;
+    constructor(base: Base, amount: number, type: number, walletId: string, categoryId: string,transactionDate?:Date) {
         this.description = base.description;
-        this.icon = base.icon;
-        this.color = base.color;
         this.amount = amount;
         this.type = type;
         this.walletId = walletId;
@@ -27,6 +24,7 @@ export class Transaction {
         this.id = base.id?base.id:new UUID(4).toString();
         this.createdAt = base.createdAt;
         this.updatedAt = base.updatedAt;
+        this.transactionDate = transactionDate ? transactionDate : this.createdAt;
         this.isDeleted = base.isDeleted; 
     }
 }

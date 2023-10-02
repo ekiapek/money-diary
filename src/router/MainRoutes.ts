@@ -36,6 +36,11 @@ const MainRoutes = {
             path: '/wallet',
             component: () => import('@/views/pages/Wallet/Wallet.vue')
         },
+        {
+            name: 'Transaction',
+            path: '/transaction',
+            component: () => import('@/views/pages/Transaction/Transaction.vue')
+        },
     ]
 };
 

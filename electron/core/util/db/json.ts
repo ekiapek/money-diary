@@ -1,9 +1,9 @@
 import path from "node:path";
 import fs from "fs";
 import { logger } from "../logging/winston";
+import { appDirectory } from "../../common/constants";
 
-
-const dbPath = path.join(__dirname, '/data');
+const dbPath = path.join(appDirectory, '/data');
 
 export class JsonDB {
     private static _instance: JsonDB;
@@ -105,7 +105,6 @@ export class JsonDB {
             if (!records) {
                 throw Error("invalid object key");
             }
-
             let jsonString = JSON.stringify(records);
             fs.writeFile(path.join(dbPath, key + ".json"), jsonString, (err) => {
                 if (err) {
@@ -115,4 +114,8 @@ export class JsonDB {
 
         }
     }
+
+    public static groupBy(xs:any, f:any) {
+        return xs.reduce((r:any, v:any, i:any, a:any, k = f(v)) => ((r[k] || (r[k] = [])).push(v), r), {});
+      }
 }

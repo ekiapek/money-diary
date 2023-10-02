@@ -19,6 +19,7 @@ export class WalletUsecase implements IWalletUsecase {
         return await this.repo.getById(id);
     }
     async update(data: Wallet): Promise<boolean> {
+        data.updatedAt = new Date();
         return await this.repo.update(data);
     }
     async insert(data: Wallet): Promise<boolean> {

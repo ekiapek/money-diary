@@ -3,10 +3,13 @@ import '@mdi/font/css/materialdesignicons.css';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import { PurpleTheme} from '@/theme/LightTheme';
-
+import { VDatePicker } from 'vuetify/labs/components';
+import DayJsAdapter from '@date-io/dayjs';
 
 export default createVuetify({
-    components,
+    components:{
+        VDatePicker,
+    },
     directives,
 
     theme: {
@@ -27,5 +30,8 @@ export default createVuetify({
             // set v-tooltip default location to top
             location: 'top'
         }
-    }
+    },
+    date: {
+        adapter: DayJsAdapter,
+      }
 });

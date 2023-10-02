@@ -18,7 +18,7 @@ const walletRepo = new WalletRepository(db);
 const transactionRepo = new TransactionRepository(db);
 const categoryUc = new CategoryUsecase(categoryRepo);
 const walletUc = new WalletUsecase(walletRepo);
-const transactionUc = new TransactionUsecase(transactionRepo);
+const transactionUc = new TransactionUsecase(transactionRepo,walletRepo,categoryRepo);
 const currencies = require("currencies.json")
 
 ipcMain.handle("list:category", (event, args) => {
@@ -53,6 +53,10 @@ ipcMain.handle("get:transaction",(event,args) => {
     return transactionUc.getTransactionById(args);
 });
 
+ipcMain.handle("get:currency",(event,args) => {
+    return currencies.currencies.find((obj:any) => {return obj.code == args});
+})
+
 ipcMain.handle("insert:category", (event, args) => {
     if (args != undefined) {
         let req = JSON.parse(args) as Category;
@@ -76,7 +80,7 @@ ipcMain.handle("insert:transaction",(event,args) => {
         throw new Error("Empty argument");
     }
     let req = JSON.parse(args) as Transaction;
-    let model = new Transaction({name: req.name, description: req.description, icon: req.icon, color: req.color, createdAt: new Date()},req.amount,req.type,req.walletId,req.categoryId);
+    let model = new Transaction({description: req.description, createdAt: new Date()},req.amount,req.type,req.walletId,req.categoryId, req.transactionDate);
     return transactionUc.insert(model);
 });
 

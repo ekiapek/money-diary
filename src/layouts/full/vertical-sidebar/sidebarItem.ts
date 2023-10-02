@@ -28,7 +28,7 @@ const sidebarItem: menu[] = [
     {
         title: 'Transactions',
         icon: FileDollarIcon,
-        to: '/ui/typography'
+        to: '/transaction'
     },
     // { header: 'wallets' },
     {
