@@ -131,7 +131,11 @@ export class TransactionUsecase implements ITransactionUsecase {
                     wallet.balance += data.amount * data.type * -1;
                     this.walletRepo.update(wallet).then((result) => {
                         if (result) {
-                            resolve(this.repo.delete(data.id));
+                            this.repo.delete(data?.id).then((result) => {
+                                if (result) {
+                                    resolve(true);
+                                }
+                            }).catch(()=>{reject(false)})
                         }
                     })
                 }

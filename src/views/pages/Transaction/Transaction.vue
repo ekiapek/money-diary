@@ -17,7 +17,7 @@
         </v-col>
         <v-col cols="1"><v-chip prepend-icon="mdi-filter-variant">Filter</v-chip></v-col>
       </v-row>
-      <v-card v-for="(data) in transactions" elevation="10" class="withbg mb-7">
+      <v-card v-for="data in transactions" elevation="10" class="withbg mb-7">
         <!-- {{transactions[key]}} -->
         <v-card-item>
           <v-card-title class="text-h5">{{ new Date(data.date).toLocaleDateString(userLocale, dateOption) }}</v-card-title>
@@ -34,7 +34,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in data.transactions" :key="item.id" class="trx-row" @click="editItem(item)">
+              <tr v-for="item in data.transactions" :key="item.id" class="trx-row" @click.stop="editItem(item)">
                 <td>
                   <div class="">
                     <v-avatar class="text-white" variant="flat" :color="item.category.color">
@@ -55,7 +55,7 @@
                 <td style="max-width: 300px;">
                   <p class="d-inline-block text-truncate" style="max-width: inherit;">{{ item.description }}</p>
                 </td>
-                <td><v-avatar class="tbl-action-col" color="error" @click="deleteObj(item.id)"
+                <td><v-avatar class="tbl-action-col" color="error" @click.stop="deleteObj(item)"
                     style="opacity: 75%;"><v-icon icon="mdi-delete-outline"></v-icon></v-avatar></td>
               </tr>
             </tbody>
@@ -67,8 +67,9 @@
         </v-card-actions>
       </v-card>
     </v-col>
-
-    <v-dialog v-model="transactionDialog" width="600" style="z-index: 2000;">
+  </v-row>
+  
+  <v-dialog v-model="transactionDialog" width="600" style="z-index: 2000;">
       <loading v-model:active="isLoading"/>
       <v-card class="pa-2">
         <v-card-title class="headline black pt-4" primary-title>
@@ -138,7 +139,7 @@
         </v-card-text>
         <v-card-actions class="pa-5 justify-end">
           <v-btn class="px-5" @click="transactionDialog = false" variant="tonal" color="muted">Cancel</v-btn>
-          <v-btn v-if="transaction.createdAt" class="px-5" @click="deleteObj()" variant="tonal"
+          <v-btn v-if="transaction.createdAt" class="px-5" @click="deleteObj(transaction)" variant="tonal"
             color="error">Delete</v-btn>
           <v-btn class="px-8" type="submit" @click.stop="saveTransaction()" variant="tonal" color="primary">Save</v-btn>
         </v-card-actions>
@@ -148,7 +149,6 @@
     <v-snackbar v-model="snackbar" :timeout="2000" :color="snackbarColor">
       {{ snackbarMsg }}
     </v-snackbar>
-  </v-row>
 </template>
 <script lang="ts">
 import { Transaction } from '../../../../electron/core/models/Transaction';
@@ -169,7 +169,6 @@ export default {
       spendingCategories: [],
       wallets: [],
       transactions: undefined,
-      transactionTypes: [],
       transactionDialog: false,
       transaction: null,
       snackbar: false,
@@ -213,6 +212,7 @@ export default {
     loadData() {
       window.api.listTransactions().then((response) => {
         this.transactions = response.data;
+        console.log(response);
       }).catch((error) => {
       });
     },
@@ -246,7 +246,6 @@ export default {
     saveTransaction() {
       this.$refs.transactionForm.validate().then((result) => {
         if (result.valid) {
-          console.log(this.transaction);
           this.transaction.balance = Number(this.transaction.balance)
           if (!this.transaction.createdAt) {
             this.transaction.createdAt = new Date();
@@ -290,19 +289,21 @@ export default {
       });
 
     },
-    deleteObj(objId?: string) {
-      let id = objId;
+    deleteObj(obj: any) {
+      let id = obj.id;
+      this.transaction = obj;
       if (id === undefined) {
         id = this.transaction.id;
       }
       if (confirm("Delete transaction?")) {
         window.api.deleteTransaction(id).then((success) => {
+          console.log(success)
           if (success) {
             this.snackbarMsg = "Deleted transaction";
             this.snackbarColor = "success";
             this.snackbar = true;
             this.transactionDialog = false;
-            this.loadData()
+            this.loadData();
           } else {
             this.snackbarMsg = "Failed to delete transaction";
             this.snackbarColor = "error";
@@ -355,7 +356,7 @@ export default {
 
 .trx-row:hover {
   background: rgb(238, 238, 238) !important;
-  ;
+  cursor: pointer;
 }
 
 .tbl-action-col {
@@ -364,4 +365,5 @@ export default {
 
 .trx-row:hover .tbl-action-col {
   visibility: visible;
+  z-index: 1000;
 }</style>
