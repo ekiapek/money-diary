@@ -41,7 +41,7 @@ const sDrawer = ref(true);
 
     </v-navigation-drawer>
     <!------Header-------->
-    <v-app-bar elevation="0" height="70">
+    <!-- <v-app-bar elevation="0" height="70">
         <div class="d-flex align-center justify-space-between w-100">
             <div>
                 <v-btn class="hidden-lg-and-up ms-md-3 ms-sm-5 ms-3 text-muted" @click="sDrawer = !sDrawer" icon variant="flat"
@@ -50,11 +50,9 @@ const sDrawer = ref(true);
                 </v-btn>
             </div>
             <div>
-                 <!-- Notification -->
                 <NotificationDD />
-                <!-- User Profile -->
                 <ProfileDD />
             </div>
         </div>
-    </v-app-bar>
+    </v-app-bar> -->
 </template>

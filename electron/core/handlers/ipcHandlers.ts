@@ -12,9 +12,6 @@ import { Transaction } from "../models/Transaction";
 import { WALLET_TYPES } from "../common/constants";
 import { logger } from "../util/logging/winston";
 import { ChartData, DashboardResponse } from "../models/Dashboard";
-import { ApexOptions } from "apexcharts";
-import { end } from "@popperjs/core";
-import { setTimeout } from "timers/promises";
 
 
 const db = JsonDB.getInstance();
@@ -26,27 +23,27 @@ const walletUc = new WalletUsecase(walletRepo);
 const transactionUc = new TransactionUsecase(transactionRepo, walletRepo, categoryRepo);
 const currencies = require("currencies.json")
 
-ipcMain.handle("list:category", (event, args) => {
+ipcMain.handle("list:category", () => {
     return categoryUc.getAllCategories();
 });
 
-ipcMain.handle("list:wallet", (event, args) => {
+ipcMain.handle("list:wallet", () => {
     return walletUc.getAllWallets();
 });
 
-ipcMain.handle("list:transaction", (event, args) => {
+ipcMain.handle("list:transaction", () => {
     return transactionUc.getAllTransactions();
 });
 
-ipcMain.handle("list:currencies", (event, args) => {
+ipcMain.handle("list:currencies", () => {
     return currencies.currencies;
 })
 
-ipcMain.handle("list:wallet-types", (event, args) => {
+ipcMain.handle("list:wallet-types", () => {
     return WALLET_TYPES;
 })
 
-ipcMain.handle("get:dashboard", async (event, args) => {
+ipcMain.handle("get:dashboard", async (_event, args) => {
     try {
         let req = JSON.parse(args);
         let startPeriod = new Date(req.start);
@@ -123,23 +120,23 @@ ipcMain.handle("get:dashboard", async (event, args) => {
     }
 })
 
-ipcMain.handle("get:category", (event, args) => {
+ipcMain.handle("get:category", (_event, args) => {
     return categoryUc.getCategoryById(args); //args must be uuid string
 });
 
-ipcMain.handle("get:wallet", (event, args) => {
+ipcMain.handle("get:wallet", (_event, args) => {
     return walletUc.getWalletById(args);
 });
 
-ipcMain.handle("get:transaction", (event, args) => {
+ipcMain.handle("get:transaction", (_event, args) => {
     return transactionUc.getTransactionById(args);
 });
 
-ipcMain.handle("get:currency", (event, args) => {
+ipcMain.handle("get:currency", (_event, args) => {
     return currencies.currencies.find((obj: any) => { return obj.code == args });
 })
 
-ipcMain.handle("insert:category", (event, args) => {
+ipcMain.handle("insert:category", (_event, args) => {
     if (args != undefined) {
         let req = JSON.parse(args) as Category;
         let cat = new Category({ name: req.name, description: req.description, icon: req.icon, color: req.color, createdAt: new Date() }, req.type);
@@ -148,7 +145,7 @@ ipcMain.handle("insert:category", (event, args) => {
     throw new Error("Empty argument");
 });
 
-ipcMain.handle("insert:wallet", (event, args) => {
+ipcMain.handle("insert:wallet", (_event, args) => {
     if (!args) {
         throw new Error("Empty argument");
     }
@@ -157,7 +154,7 @@ ipcMain.handle("insert:wallet", (event, args) => {
     return walletUc.insert(model);
 });
 
-ipcMain.handle("insert:transaction", (event, args) => {
+ipcMain.handle("insert:transaction", (_event, args) => {
     if (!args) {
         throw new Error("Empty argument");
     }
@@ -166,29 +163,29 @@ ipcMain.handle("insert:transaction", (event, args) => {
     return transactionUc.insert(model);
 });
 
-ipcMain.handle("update:category", (event, args) => {
+ipcMain.handle("update:category", (_event, args) => {
     let req = JSON.parse(args) as Category;
     return categoryUc.update(req);
 });
 
-ipcMain.handle("update:wallet", (event, args) => {
+ipcMain.handle("update:wallet", (_event, args) => {
     let req = JSON.parse(args) as Wallet;
     return walletUc.update(req);
 });
 
-ipcMain.handle("update:transaction", (event, args) => {
+ipcMain.handle("update:transaction", (_event, args) => {
     let req = JSON.parse(args) as Transaction
     return transactionUc.update(req);
 });
 
-ipcMain.handle("delete:category", (event, args) => {
+ipcMain.handle("delete:category", (_event, args) => {
     return categoryUc.delete(args);
 });
 
-ipcMain.handle("delete:wallet", (event, args) => {
+ipcMain.handle("delete:wallet", (_event, args) => {
     return walletUc.delete(args);
 });
 
-ipcMain.handle("delete:transaction", (event, args) => {
+ipcMain.handle("delete:transaction", (_event, args) => {
     return transactionUc.delete(args);
 });

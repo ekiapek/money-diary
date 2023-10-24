@@ -15,7 +15,7 @@
         <v-col cols="11">
           
         </v-col>
-        <v-col cols="1"><v-chip prepend-icon="mdi-filter-variant">Filter</v-chip></v-col>
+        <!-- <v-col cols="1"><v-chip prepend-icon="mdi-filter-variant">Filter</v-chip></v-col> -->
       </v-row>
 
       <v-card v-if="transactions == null" elevation="10" class="mb-5 align-top text-center justify-center pa-3">
