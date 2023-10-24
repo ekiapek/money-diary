@@ -24,7 +24,8 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
           </div>
           <v-container class="">
             <v-row justify="start">
-              <v-col v-for="cat in spendings" :key="cat.id" cols="3">
+              <v-col v-if="spendings.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+              <v-col v-else v-for="cat in spendings" :key="cat.id" cols="3">
                 <v-card elevation="10" @click="editItem(cat)">
                   <div class="py-5 px-4">
                     <v-row justify="start">
@@ -65,7 +66,8 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
           </div>
           <v-container class="">
             <v-row justify="start">
-              <v-col v-for="cat in income" :key="cat.id" cols="3">
+              <v-col v-if="income.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+              <v-col v-else v-for="cat in income" :key="cat.id" cols="3">
                 <v-card elevation="10" @click="editItem(cat)">
                   <div class="py-5 px-4">
                     <v-row justify="start">
@@ -153,12 +155,14 @@ export default {
   methods: {
     loadData() {
       window.api.listCategories().then((response) => {
-        this.spendings = response.filter((obj) => {
-          return obj.type == -1;
-        });
-        this.income = response.filter((obj) => {
-          return obj.type == 1;
-        });
+        if (response) {
+          this.spendings = response.filter((obj) => {
+            return obj.type == -1;
+          });
+          this.income = response.filter((obj) => {
+            return obj.type == 1;
+          });
+        }
       });
     },
     addItem(type) {

@@ -17,7 +17,11 @@
         </v-col>
         <v-col cols="1"><v-chip prepend-icon="mdi-filter-variant">Filter</v-chip></v-col>
       </v-row>
-      <v-card v-for="data in transactions" elevation="10" class="withbg mb-7">
+
+      <v-card v-if="transactions == null" elevation="10" class="mb-5 align-top text-center justify-center pa-3">
+        <p><i>No data</i></p>
+      </v-card>
+      <v-card v-else v-for="data in transactions" elevation="10" class="withbg mb-7">
         <!-- {{transactions[key]}} -->
         <v-card-item>
           <v-card-title class="text-h5">{{ new Date(data.date).toLocaleDateString(userLocale, dateOption) }}</v-card-title>
@@ -67,9 +71,8 @@
         </v-card-actions>
       </v-card>
     </v-col>
-  </v-row>
-  
-  <v-dialog v-model="transactionDialog" width="600" style="z-index: 2000;">
+
+    <v-dialog v-model="transactionDialog" width="600" style="z-index: 2000;">
       <loading v-model:active="isLoading"/>
       <v-card class="pa-2">
         <v-card-title class="headline black pt-4" primary-title>
@@ -82,7 +85,41 @@
 
             <DatePicker v-model="transaction.transactionDate" @dateSelect="handleDate" />
 
-            <v-select class="mb-4" v-model="transaction.walletId" variant="outlined" label="Select Wallet" item-value="id"
+            <div v-if="transaction.type === undefined">
+              <v-select class="mb-4" v-model="transaction.walletId" variant="outlined" label="Select Wallet" item-value="id"
+              item-title="name" disabled :items="wallets" :menu-props="{ maxHeight: '200px' }">
+              </v-select>
+          </div>
+            <div v-else-if="transaction.type == 2">
+              <v-select class="mb-4" v-model="transaction.walletId" variant="outlined" label="Select Source Wallet" item-value="id"
+              item-title="name" :items="wallets" :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }"
+              @update:modelValue="renderAmountCurrency">
+              <template v-slot:item="{ props, item }">
+                <v-list-item v-bind="props" :title="item?.raw?.name" :subtitle="item?.raw?.currency">
+                  <template v-slot:prepend>
+                    <v-avatar class="text-white" variant="flat" :color="item?.raw?.color">
+                      <span class="text-h4">{{ item?.raw?.icon }}</span>
+                    </v-avatar>
+                  </template>
+                </v-list-item>
+              </template>
+              </v-select>
+
+              <v-select class="mb-4" v-model="transaction.walletId" variant="outlined" label="Select Destination Wallet" item-value="id"
+              item-title="name" :items="wallets" :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }">
+              <template v-slot:item="{ props, item }">
+                <v-list-item v-bind="props" :title="item?.raw?.name" :subtitle="item?.raw?.currency">
+                  <template v-slot:prepend>
+                    <v-avatar class="text-white" variant="flat" :color="item?.raw?.color">
+                      <span class="text-h4">{{ item?.raw?.icon }}</span>
+                    </v-avatar>
+                  </template>
+                </v-list-item>
+              </template>
+              </v-select>
+            </div>
+            <div v-else>
+              <v-select class="mb-4" v-model="transaction.walletId" variant="outlined" label="Select Wallet" item-value="id"
               item-title="name" :items="wallets" :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }"
               @update:modelValue="renderAmountCurrency">
               <template v-slot:item="{ props, item }">
@@ -95,6 +132,7 @@
                 </v-list-item>
               </template>
             </v-select>
+            </div>
 
             <v-select v-if="transaction.type == 1" v-model="transaction.categoryId" class="mb-4" label="Select Category"
               variant="outlined" item-value="id" item-title="name" :items="incomeCategories" :rules="[rules.required]"
@@ -130,7 +168,7 @@
             </v-select>
 
             <v-text-field class="mb-4" v-model="transaction.amount" label="Amount" variant="outlined"
-              :prefix="currencyPrefix" @focus="removeInitialZero" @input="removeLeadingZero"
+              :prefix="currencyPrefix" :rules="[rules.required]" @focus="removeInitialZero" @input="removeLeadingZero"
               @keypress="onlyNumberInput"></v-text-field>
 
             <v-textarea v-model="transaction.description" label="Description" variant="outlined"></v-textarea>
@@ -149,6 +187,7 @@
     <v-snackbar v-model="snackbar" :timeout="2000" :color="snackbarColor">
       {{ snackbarMsg }}
     </v-snackbar>
+  </v-row>
 </template>
 <script lang="ts">
 import { Transaction } from '../../../../electron/core/models/Transaction';
@@ -180,10 +219,9 @@ export default {
       userLocale: navigator.language,
       isLoading:false,
       dateOption: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
-      trxType: [{ name: "Income", type: 1 }, { name: "Spending", type: -1 }],
+      trxType: [{ name: "Income", type: 1 }, { name: "Spending", type: -1 }, { name: "Transfer Money", type: 2 }],
       rules: {
-        required: value => !!value || "This field is required",
-        email: v => /.+@.+\..+/.test(v) || "Must be a valid email"
+        required: value => !!value || "This field is required"
       }
     };
   },
@@ -196,24 +234,30 @@ export default {
     formatCurrency,
     loadCategories() {
       window.api.listCategories().then((response) => {
-        this.spendingCategories = response.filter((obj: any) => {
-          return obj.type == -1;
-        });
-        this.incomeCategories = response.filter((obj: any) => {
-          return obj.type == 1;
-        });
+        if (response){
+          this.spendingCategories = response.filter((obj: any) => {
+            return obj.type == -1;
+          });
+          this.incomeCategories = response.filter((obj: any) => {
+            return obj.type == 1;
+          });
+        }
       });
     },
     loadWallets() {
       window.api.listWallets().then((response) => {
-        this.wallets = response;
+        if (response) {
+          this.wallets = response;
+        }
       });
     },
     loadData() {
       window.api.listTransactions().then((response) => {
-        this.transactions = response.data;
-        console.log(response);
+        if (response != null) {
+          this.transactions = response.data;
+        }
       }).catch((error) => {
+        console.log(error)
       });
     },
     customFilter(queryText: string, item: any) {

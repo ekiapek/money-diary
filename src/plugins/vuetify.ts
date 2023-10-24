@@ -5,10 +5,12 @@ import * as directives from 'vuetify/directives';
 import { PurpleTheme} from '@/theme/LightTheme';
 import { VDatePicker } from 'vuetify/labs/components';
 import DayJsAdapter from '@date-io/dayjs';
+import { VSkeletonLoader } from 'vuetify/labs/VSkeletonLoader'
 
 export default createVuetify({
     components:{
         VDatePicker,
+        VSkeletonLoader
     },
     directives,
 

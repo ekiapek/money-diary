@@ -21,24 +21,17 @@ export class TransactionUsecase implements ITransactionUsecase {
         this.categoryRepo = categoryRepo;
     }
 
-    async getAllTransactions(from?: Date, to?: Date) {
+    async getAllTransactions(from?: Date, to?: Date):Promise<Transaction[]|Error> {
         try {
             let transactions = await this.repo.getAll();
             let categories = await this.categoryRepo.getAll();
             let wallets = await this.walletRepo.getAll();
+            let result:any = {}
 
-            if (from !== undefined) {
-                transactions = transactions.filter((obj: Transaction) => {
-                    return obj.createdAt.getTime() > from.getTime();
-                })
+            if (!transactions) {
+                throw "failed to get transactions";
             }
-
-            if (to !== undefined) {
-                transactions = transactions.filter((obj: Transaction) => {
-                    return obj.createdAt.getTime() < to.getTime();
-                })
-            }
-
+            
             // transactions = transactions.sort((x: Transaction, y: Transaction) => (x.createdAt > y.createdAt ? -1 : 1));
 
             let trxResponse: any[] = [];
@@ -62,10 +55,24 @@ export class TransactionUsecase implements ITransactionUsecase {
 
                 trxResponse.push(trx);
             });
+
+            if (from !== undefined) {
+                trxResponse = trxResponse.filter((obj: Transaction) => {
+                    return obj.transactionDate.getTime() > from.getTime();
+                })
+            }
+
+            if (to !== undefined) {
+                trxResponse = trxResponse.filter((obj: Transaction) => {
+                    return obj.transactionDate.getTime() < to.getTime();
+                })
+            }
+
             transactions = JsonDB.groupBy(trxResponse, (x: Transaction) => x.transactionDate.toLocaleDateString());
 
             let resultData: any[] = []
             let dateKeys = Object.keys(transactions);
+            
             dateKeys.forEach((key: string) => {
                 let resData: any = {};
                 transactions[key] = transactions[key].sort((x: Transaction, y: Transaction) => (x.transactionDate > y.transactionDate ? -1 : 1));
@@ -74,15 +81,69 @@ export class TransactionUsecase implements ITransactionUsecase {
                 resultData.push(resData);
             });
 
-            let result:any = {}
-            result["data"] = resultData;
             resultData = resultData.sort((x, y) => x.date > y.date ? -1 : 1);
+            result["data"] = resultData;
             return result;
         }
         catch (e) {
+            logger.error(e.stack)
             return Error("Failed to load transactions");
         }
 
+    }
+    async getTransactions(from?: Date, to?: Date):Promise<Transaction[]|Error> {
+        try {
+            let transactions = await this.repo.getAll();
+            let categories = await this.categoryRepo.getAll();
+            let wallets = await this.walletRepo.getAll();
+
+            if (!transactions) {
+                return [];
+            }
+            
+
+            let trxResponse: any[] = [];
+            transactions.forEach(function (obj) {
+                let trx: any = { ...obj };
+                let category = categories.find((x: Category) => { return x.id == obj.categoryId });
+                let wallet = wallets.find((x: Wallet) => { return x.id == obj.walletId })
+                trx["wallet"] = wallet;
+                trx["category"] = category;
+
+                if (typeof trx.createdAt === "string") {
+                    trx.createdAt = new Date(trx.createdAt);
+                }
+
+                if (trx.transactionDate === undefined) {
+                    trx.transactionDate = trx.createdAt;
+                }
+                else if (trx.transactionDate !== undefined && typeof trx.transactionDate === "string") {
+                    trx.transactionDate = new Date(trx.transactionDate);
+                }
+
+                trxResponse.push(trx);
+            });
+
+            if (from !== undefined) {
+                trxResponse = trxResponse.filter((obj: Transaction) => {
+                    return obj.transactionDate.getTime() > from.getTime();
+                })
+            }
+
+            if (to !== undefined) {
+                trxResponse = trxResponse.filter((obj: Transaction) => {
+                    return obj.transactionDate.getTime() < to.getTime();
+                })
+            }
+
+            trxResponse = trxResponse.sort((x: Transaction, y: Transaction) => (x.transactionDate > y.transactionDate ? -1 : 1));
+                
+            return trxResponse;
+        }
+        catch (e) {
+            logger.error(e.stack);
+            return Error("Failed to load transactions");
+        }
     }
     async getTransactionById(id: string): Promise<Transaction | undefined> {
         return await this.repo.getById(id);

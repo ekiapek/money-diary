@@ -13,7 +13,8 @@
 
       <v-container class="">
         <v-row justify="start">
-          <v-col v-for="item in wallets" :key="item.id" cols="4">
+          <v-col v-if="wallets.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+          <v-col v-else v-for="item in wallets" :key="item.id" cols="4">
             <v-card elevation="10" @click="editItem(item)">
               <v-container class="py-3 px-4">
                 <v-row class="align-center" justify="start">
@@ -122,7 +123,9 @@ export default {
     formatCurrency,
     loadData() {
       window.api.listWallets().then((response) => {
-        this.wallets = response;
+        if (response) {
+          this.wallets = response;
+        }
       });
       window.api.listWalletTypes().then((response) => {
         this.walletTypes =response;
