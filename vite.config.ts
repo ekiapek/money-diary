@@ -8,6 +8,9 @@ import { resolve } from 'node:path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define:{
+    'process.env':process.env
+  },
   ssr:{
     external: ["mock-aws-s3", "aws-sdk", "nock","uuid"],
     target:'node'

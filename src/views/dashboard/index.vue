@@ -106,7 +106,7 @@ export default {
             wallets: [],
             incomeChart: undefined,
             spendingsChart: undefined,
-            currency: "",
+            currency: "USD",
             isLoading: false,
         }
     },
@@ -122,7 +122,7 @@ export default {
             const paramJson = JSON.stringify({ start: startOfMonth, end: today });
 
             window.api.getDashboard(paramJson).then((dashboardData) => {
-                console.log(dashboardData)
+                
                 this.isLoading = false;
                 if (dashboardData) {
                     this.currency = dashboardData.currency;
@@ -133,7 +133,6 @@ export default {
                     this.wallets = dashboardData.wallets;
                     this.incomeChart = dashboardData.incomeChart;
                     this.spendingsChart = dashboardData.spendingChart;
-                    console.log(this.currency);
                 }
             }).catch((error) => { console.log(error) })
         }

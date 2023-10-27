@@ -341,7 +341,7 @@ export default {
       }
       if (confirm("Delete transaction?")) {
         window.api.deleteTransaction(id).then((success) => {
-          console.log(success)
+          
           if (success) {
             this.snackbarMsg = "Deleted transaction";
             this.snackbarColor = "success";
@@ -387,7 +387,7 @@ export default {
 
     },
     handleDate(date) {
-      console.log(date);
+      
     }
   },
 };

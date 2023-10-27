@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import "./core/handlers/ipcHandlers";
 import { JsonDB } from './core/util/db/json';
-
+const url = require('url');
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -23,6 +23,8 @@ const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 function createWindow() {
   win = new BrowserWindow({
     icon: path.join(process.env.PUBLIC, 'electron-vite.svg'),
+    width:960,
+    height:600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -38,12 +40,20 @@ function createWindow() {
   } else {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))
+    // win.loadURL(
+    //   url.format({
+    //     pathname: path.join(__dirname, `/dist/index.html`),
+    //     protocol: "file:",
+    //     slashes: true
+    //   })
+    // );
   }
 }
 
 app.on('window-all-closed', () => {
   win = null;
   JsonDB.getInstance().persistData();
+  app.quit();
 })
 
 app.whenReady().then(createWindow)
