@@ -31,18 +31,22 @@ export class JsonDB {
             fileNames.forEach((fileName: string) => {
                 let typeName = fileName.match(/(^.*?)\.json/);
                 if (typeName) {
-                    fs.readFile(path.join(dbPath, fileName), 'utf8', (err, data) => {
-                        if (err) {
-                            logger.error(err);
-                        }
-                        logger.info(fileName)
-                        logger.info(data)
-                        let jsonData = JSON.parse(data);
-                        let key = path.parse(fileName).name
-                        logger.info(key)
-                        this._instance.data.set(key, jsonData);
-                    })
-
+                    let filePath = path.join(dbPath, fileName)
+                    try {
+                        fs.readFile(filePath, 'utf8', (err, data) => {
+                            if (err) {
+                                logger.error(err);
+                            }
+                            logger.info(fileName)
+                            logger.info(data)
+                            let jsonData = JSON.parse(data);
+                            let key = path.parse(fileName).name
+                            logger.info(key)
+                            this._instance.data.set(key, jsonData);
+                        });
+                    } catch {
+                        alert("Error reading file. "+ filePath);
+                    }
                 }
             });
         }

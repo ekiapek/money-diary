@@ -91,6 +91,7 @@ import { formatCurrency } from '@/util/currency';
 import TransactionsChart from '@/components/dashboard/TransactionsChart.vue';
 import WalletList from '@/components/dashboard/WalletList.vue';
 import RecentTransactions from '@/components/dashboard/RecentTransactions.vue';
+
 export default {
     components:{
         "TransactionsChart":TransactionsChart,

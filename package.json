@@ -6,7 +6,7 @@
   },
   "description": "Know where your money go by logging your transactions.",
   "private": true,
-  "version": "0.8.0",
+  "version": "0.8.1",
   "scripts": {
     "dev": "vite",
     "build": "vite build && electron-builder",

@@ -9,7 +9,7 @@ import { WalletUsecase } from "../usecases/WalletUsecase";
 import { TransactionUsecase } from "../usecases/TransactionUsecase";
 import { Wallet } from "../models/Wallet";
 import { Transaction } from "../models/Transaction";
-import { WALLET_TYPES } from "../common/constants";
+import { WALLET_TYPES, appDirectory } from "../common/constants";
 import { logger } from "../util/logging/winston";
 import { ChartData, DashboardResponse } from "../models/Dashboard";
 
@@ -112,7 +112,6 @@ ipcMain.handle("get:dashboard", async (_event, args) => {
             result.wallets = wallets;
             result.currency = wallets[0].currency;
         }
-
         return result;
     } catch (e) {
         logger.error(e)

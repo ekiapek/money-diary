@@ -1,10 +1,10 @@
-import { homedir } from "os";
-import { join } from "path";
+import path from "node:path";
 import pkg from "../../../package.json";
+import { app} from 'electron';
 
 // Contains constants for this project
 
-export const appDirectory = join(homedir(), pkg.name);
+export const appDirectory = path.join(app.getPath("documents"), pkg.name);
 
 export const TRX_TYPE_SPENDING = -1
 export const TRX_TYPE_INCOME = 1
