@@ -59,13 +59,14 @@
                 <v-col cols="12" lg="12">
                     <v-skeleton-loader :loading="isLoading" type="card">
                         <TransactionsChart v-if="spendingsChart !== undefined" title="Monthly Spendings" :chart-series="spendingsChart.data" :chart-colors="spendingsChart.colors" :chart-labels="spendingsChart.labels" />
-                        <p v-else><i>No data</i></p>
+                        <TransactionsChart v-else title="Monthly Spendings" :chart-series="undefined" :chart-colors="undefined" :chart-labels="undefined" />
                     </v-skeleton-loader>
                 </v-col>
                 <v-col cols="12" lg="8">
                     <v-skeleton-loader :loading="isLoading" type="card">
                         <TransactionsChart v-if="incomeChart !== undefined" title="Monthly Income" :chart-series="incomeChart.data" :chart-colors="incomeChart.colors" :chart-labels="incomeChart.labels" />
-                        <p v-else><i>No data</i></p>
+                        <TransactionsChart v-else title="Monthly Income" :chart-series="undefined" :chart-colors="undefined" :chart-labels="undefined" />
+                        
                     </v-skeleton-loader>
                 </v-col>
                 <v-col cols="12" lg="4">
@@ -126,7 +127,7 @@ export default {
                 
                 this.isLoading = false;
                 if (dashboardData) {
-                    this.currency = dashboardData.currency;
+                    this.currency = dashboardData.currency?dashboardData.currency:this.currency;
                     this.totalFunds = formatCurrency(dashboardData.totalFund,this.currency);
                     this.totalIncome = formatCurrency(dashboardData.totalIncome,this.currency);
                     this.totalSpendings = formatCurrency(dashboardData.totalSpendings,this.currency);

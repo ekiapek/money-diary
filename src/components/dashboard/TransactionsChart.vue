@@ -10,7 +10,7 @@ const props = defineProps({
 
 // const select = ref('March 2023');
 // const items = ref(['March 2023', 'April 2023', 'May 2023']);
-const chartOptions = computed(() => {
+const chartOptions = props.chartSeries && props.chartColors && props.chartLabels ? computed(() => {
     return {
         labels: props.chartLabels,
         chart: {
@@ -44,7 +44,7 @@ const chartOptions = computed(() => {
         },
         tooltip: { theme: "light", fillSeriesColor: false },
     };
-});
+}):undefined;
 </script>
 <template>
     <v-card elevation="10" class="withbg">
@@ -57,7 +57,7 @@ const chartOptions = computed(() => {
                 </div> -->
             </div>
             <div class="mt-6">
-                <apexchart v-if="chartSeries.length>0" type="donut" height="370px" :options="chartOptions" :series="props.chartSeries">
+                <apexchart v-if="chartSeries" type="donut" height="370px" :options="chartOptions" :series="props.chartSeries">
                 </apexchart>
                 <p v-else><i>No data</i></p>
             </div>

@@ -9,13 +9,14 @@ export class Transaction {
     amount: number;
     type: number;
     walletId: string;
+    destinationWalletId?: string;
     categoryId: string;
     transactionDate: Date;
     createdAt: Date;
     updatedAt?: Date;
     isDeleted?: boolean;
 
-    constructor(base: Base, amount: number, type: number, walletId: string, categoryId: string,transactionDate?:Date) {
+    constructor(base: Base, amount: number, type: number, walletId: string, categoryId: string,transactionDate?:Date, destinationWalletId?: string) {
         this.description = base.description;
         this.amount = amount;
         this.type = type;
@@ -24,6 +25,7 @@ export class Transaction {
         this.id = base.id?base.id:new UUID(4).toString();
         this.createdAt = base.createdAt;
         this.updatedAt = base.updatedAt;
+        this.destinationWalletId = destinationWalletId;
         this.transactionDate = transactionDate ? transactionDate : this.createdAt;
         this.isDeleted = base.isDeleted; 
     }

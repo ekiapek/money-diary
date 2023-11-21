@@ -36,6 +36,7 @@ const props = defineProps({
                             <td>
                             <v-chip v-if="item.type == 1" :class="'text-body-1 bg-success'" color="white"
                                 size="small">Income</v-chip>
+                            <v-chip v-else-if="item.type == 2" :class="'text-body-1 bg-warning'" color="white" size="small">Transfer</v-chip>
                             <v-chip v-else :class="'text-body-1 bg-error'" color="white" size="small">Spending</v-chip>
                             </td>
                             <td style="max-width: 300px;">

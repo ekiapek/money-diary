@@ -54,6 +54,7 @@
                 <td>
                   <v-chip v-if="item.type == 1" :class="'text-body-1 bg-success'" color="white"
                     size="small">Income</v-chip>
+                  <v-chip v-else-if="item.type == 2" :class="'text-body-1 bg-warning'" color="white" size="small">Transfer</v-chip>
                   <v-chip v-else :class="'text-body-1 bg-error'" color="white" size="small">Spending</v-chip>
                 </td>
                 <td style="max-width: 300px;">
@@ -105,7 +106,7 @@
               </template>
               </v-select>
 
-              <v-select class="mb-4" v-model="transaction.walletId" variant="outlined" label="Select Destination Wallet" item-value="id"
+              <v-select class="mb-4" v-model="transaction.destinationWalletId" variant="outlined" label="Select Destination Wallet" item-value="id"
               item-title="name" :items="wallets" :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }">
               <template v-slot:item="{ props, item }">
                 <v-list-item v-bind="props" :title="item?.raw?.name" :subtitle="item?.raw?.currency">
@@ -158,6 +159,12 @@
                     </v-avatar>
                   </template>
                 </v-list-item>
+              </template>
+            </v-select>
+            <v-select v-else-if="transaction.type == 2" class="mb-4" label="Select Category" variant="outlined" item-disabled="disabled"
+              item-title="name" :items='[]' :menu-props="{ maxHeight: '200px' }" disabled>
+              <template v-slot:no-data>
+                <span class="px-4"><i>Please select transaction type</i></span>
               </template>
             </v-select>
             <v-select v-else class="mb-4" label="Select Category" variant="outlined" item-disabled="disabled"
