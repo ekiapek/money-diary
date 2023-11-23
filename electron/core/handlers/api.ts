@@ -2,7 +2,7 @@ import { ipcRenderer } from "electron";
 
 const listCategories = () => ipcRenderer.invoke("list:category");
 const listWallets = () => ipcRenderer.invoke("list:wallet");
-const listTransactions = () => ipcRenderer.invoke("list:transaction");
+const listTransactions = (args?: any) => ipcRenderer.invoke("list:transaction", args);
 const listCurrencies = () => ipcRenderer.invoke("list:currencies");
 const listWalletTypes = () => ipcRenderer.invoke("list:wallet-types");
 

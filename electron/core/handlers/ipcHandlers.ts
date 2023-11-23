@@ -31,7 +31,11 @@ ipcMain.handle("list:wallet", () => {
     return walletUc.getAllWallets();
 });
 
-ipcMain.handle("list:transaction", () => {
+ipcMain.handle("list:transaction", (_event, args) => {
+    if (args !== undefined) {
+        let req = JSON.parse(args);
+        return transactionUc.getAllTransactions(new Date(req.startDate), new Date(req.endDate));
+    }
     return transactionUc.getAllTransactions();
 });
 

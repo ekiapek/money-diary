@@ -7,24 +7,13 @@
 
       </v-text-field>
     </template>
-    <!-- <v-date-picker label="lol" format="DD-MM-YYYY" show-adjacent-months locale="en-in" v-model="dateValue" hide-actions @update:modelValue="selectDate">
-      <template v-slot:header></template>
-
-    </v-date-picker> -->
-    <!-- <Calendar /> -->
-    <Picker v-model="dateValue" :min-date="min" :max-date="max" @update:modelValue="selectDate" />
+    <VueDatePicker v-model="dateValue" @update:modelValue="selectDate" inline auto-apply :enable-time-picker="false"/>
   </v-menu>
 </template>
 <script>
-import { Calendar, DatePicker } from 'v-calendar';
 import dayjs from 'dayjs';
-import 'v-calendar/style.css';
 export default {
-  components: {
-    Calendar,
-    "Picker": DatePicker,
-  },
-  data() {
+    data() {
     return {
       dateMenu: false,
       dateValue: this.modelValue !== undefined ? this.date : new Date(),

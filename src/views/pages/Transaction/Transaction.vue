@@ -11,14 +11,14 @@
         </div>
       </v-row>
 
-      <v-row class="mb-5 align-top justify-space-between">
+      <v-row class="mb-5 px-9 align-top justify-space-between">
         <v-col cols="11">
           
         </v-col>
-        <!-- <v-col cols="1"><v-chip prepend-icon="mdi-filter-variant">Filter</v-chip></v-col> -->
+        <v-col cols="1"><FilterChip @setFilter="setFilter" /></v-col>
       </v-row>
 
-      <v-card v-if="transactions == null" elevation="10" class="mb-5 align-top text-center justify-center pa-3">
+      <v-card v-if="transactions === undefined" elevation="10" class="mb-5 align-top text-center justify-center pa-3">
         <p><i>No data</i></p>
       </v-card>
       <v-card v-else v-for="data in transactions" elevation="10" class="withbg mb-7">
@@ -84,7 +84,7 @@
             <v-select class="mb-4" v-model="transaction.type" variant="outlined" label="Transaction type"
               item-value="type" item-title="name" :items="trxType" :rules="[rules.required]"></v-select>
 
-            <DatePicker v-model="transaction.transactionDate" @dateSelect="handleDate" />
+            <DatePicker v-model="transaction.transactionDate" />
 
             <div v-if="transaction.type === undefined">
               <v-select class="mb-4" v-model="transaction.walletId" variant="outlined" label="Select Wallet" item-value="id"
@@ -94,7 +94,7 @@
             <div v-else-if="transaction.type == 2">
               <v-select class="mb-4" v-model="transaction.walletId" variant="outlined" label="Select Source Wallet" item-value="id"
               item-title="name" :items="wallets" :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }"
-              @update:modelValue="renderAmountCurrency">
+              @update:modelValue="handleTransferSourceWallet">
               <template v-slot:item="{ props, item }">
                 <v-list-item v-bind="props" :title="item?.raw?.name" :subtitle="item?.raw?.currency">
                   <template v-slot:prepend>
@@ -107,7 +107,7 @@
               </v-select>
 
               <v-select class="mb-4" v-model="transaction.destinationWalletId" variant="outlined" label="Select Destination Wallet" item-value="id"
-              item-title="name" :items="wallets" :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }">
+              item-title="name" :items="destWallets" :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }">
               <template v-slot:item="{ props, item }">
                 <v-list-item v-bind="props" :title="item?.raw?.name" :subtitle="item?.raw?.currency">
                   <template v-slot:prepend>
@@ -200,13 +200,17 @@
 import { Transaction } from '../../../../electron/core/models/Transaction';
 import { formatCurrency } from '@/util/currency';
 import DatePicker from '@/components/date/DatePicker.vue';
+import MonthPicker from '@/components/date/MonthPicker.vue';
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/css/index.css';
+import FilterChip from '@/components/shared/FilterChip.vue';
 
 export default {
   components: {
     "DatePicker": DatePicker,
+    "MonthPicker": MonthPicker,
     Loading,
+    FilterChip,
   },
   data() {
     return {
@@ -214,6 +218,7 @@ export default {
       incomeCategories: [],
       spendingCategories: [],
       wallets: [],
+      destWallets: [],
       transactions: undefined,
       transactionDialog: false,
       transaction: null,
@@ -266,14 +271,6 @@ export default {
       }).catch((error) => {
         console.log(error)
       });
-    },
-    customFilter(queryText: string, item: any) {
-      const textOne = item.raw.name.toLowerCase()
-      const textTwo = item.raw.code.toLowerCase()
-      const searchText = queryText.toLowerCase()
-
-      return textOne.indexOf(searchText) > -1 ||
-        textTwo.indexOf(searchText) > -1
     },
     addItem() {
       this.transactionDialog = true;
@@ -393,8 +390,30 @@ export default {
       })
 
     },
-    handleDate(date) {
-      
+    setFilter(value) {
+      let args = JSON.stringify(value)
+      window.api.listTransactions(args).then((response) => {
+        if (response != null) {
+          this.transactions = response.data;
+        }
+      }).catch((error) => {
+        console.log(error)
+      });
+    },
+    populateDestWallet() {
+      if (this.transaction != null && this.transaction.type == 2 && this.transaction.walletId !== undefined) {
+        this.transaction.destinationWalletId = undefined;
+        window.api.getWallet(this.transaction.walletId).then((value) => {
+          this.destWallets = this.wallets.filter((obj: any) => {
+            return obj.id != this.transaction.walletId && obj.currency == value.currency;
+          });
+        })
+        
+      }
+    },
+    handleTransferSourceWallet(value) {
+      this.renderAmountCurrency(value);
+      this.populateDestWallet();
     }
   },
 };
