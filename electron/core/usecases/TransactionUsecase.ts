@@ -7,6 +7,8 @@ import { IWalletRepository } from "../repositories/interfaces/IWalletRepository"
 import { JsonDB } from "../util/db/json";
 import { logger } from "../util/logging/winston";
 import { ITransactionUsecase } from "./interfaces/ITransactionUsecase";
+
+const Transfer_Category = new Category({ name: "Transfer Money", color: "#275DAD", icon: "🔄", description: "", createdAt: new Date() }, 2)
 export class TransactionUsecase implements ITransactionUsecase {
     private repo: ITrasactionRepository;
     private walletRepo: IWalletRepository;
@@ -21,58 +23,19 @@ export class TransactionUsecase implements ITransactionUsecase {
         this.categoryRepo = categoryRepo;
     }
 
-    async getAllTransactions(from?: Date, to?: Date):Promise<Transaction[]|Error> {
+    /**
+     * Retrieve all transactions in date range and group them by date.
+    */
+    async getAllTransactions(from?: Date, to?: Date): Promise<Transaction[] | Error> {
         try {
-            let transactions = await this.repo.getAll();
-            let categories = await this.categoryRepo.getAll();
-            let wallets = await this.walletRepo.getAll();
-            let result:any = {}
+            let result: any = {};
+            let trxResponse = await this.getTransactions(from, to);
 
-            if (!transactions) {
-                throw "failed to get transactions";
-            }
-            
-            // transactions = transactions.sort((x: Transaction, y: Transaction) => (x.createdAt > y.createdAt ? -1 : 1));
-
-            let trxResponse: any[] = [];
-            transactions.forEach(function (obj) {
-                let trx: any = { ...obj };
-                let category = categories.find((x: Category) => { return x.id == obj.categoryId });
-                let wallet = wallets.find((x: Wallet) => { return x.id == obj.walletId })
-                trx["wallet"] = wallet;
-                trx["category"] = category;
-
-                if (typeof trx.createdAt === "string") {
-                    trx.createdAt = new Date(trx.createdAt);
-                }
-
-                if (trx.transactionDate === undefined) {
-                    trx.transactionDate = trx.createdAt;
-                }
-                else if (trx.transactionDate !== undefined && typeof trx.transactionDate === "string") {
-                    trx.transactionDate = new Date(trx.transactionDate);
-                }
-
-                trxResponse.push(trx);
-            });
-
-            if (from !== undefined) {
-                trxResponse = trxResponse.filter((obj: Transaction) => {
-                    return obj.transactionDate.getTime() > from.getTime();
-                })
-            }
-
-            if (to !== undefined) {
-                trxResponse = trxResponse.filter((obj: Transaction) => {
-                    return obj.transactionDate.getTime() < to.getTime();
-                })
-            }
-
-            transactions = JsonDB.groupBy(trxResponse, (x: Transaction) => x.transactionDate.toLocaleDateString());
+            let transactions = JsonDB.groupBy(trxResponse, (x: Transaction) => x.transactionDate.toLocaleDateString());
 
             let resultData: any[] = []
             let dateKeys = Object.keys(transactions);
-            
+
             dateKeys.forEach((key: string) => {
                 let resData: any = {};
                 transactions[key] = transactions[key].sort((x: Transaction, y: Transaction) => (x.transactionDate > y.transactionDate ? -1 : 1));
@@ -91,7 +54,11 @@ export class TransactionUsecase implements ITransactionUsecase {
         }
 
     }
-    async getTransactions(from?: Date, to?: Date):Promise<Transaction[]|Error> {
+
+    /**
+     * Retrieve all transactions in date range.
+    */
+    async getTransactions(from?: Date, to?: Date): Promise<Transaction[] | Error> {
         try {
             let transactions = await this.repo.getAll();
             let categories = await this.categoryRepo.getAll();
@@ -100,7 +67,7 @@ export class TransactionUsecase implements ITransactionUsecase {
             if (!transactions) {
                 return [];
             }
-            
+
 
             let trxResponse: any[] = [];
             transactions.forEach(function (obj) {
@@ -109,6 +76,10 @@ export class TransactionUsecase implements ITransactionUsecase {
                 let wallet = wallets.find((x: Wallet) => { return x.id == obj.walletId })
                 trx["wallet"] = wallet;
                 trx["category"] = category;
+
+                if (obj.type == 2) {
+                    trx["category"] = Transfer_Category;
+                }
 
                 if (typeof trx.createdAt === "string") {
                     trx.createdAt = new Date(trx.createdAt);
@@ -137,7 +108,7 @@ export class TransactionUsecase implements ITransactionUsecase {
             }
 
             trxResponse = trxResponse.sort((x: Transaction, y: Transaction) => (x.transactionDate > y.transactionDate ? -1 : 1));
-                
+
             return trxResponse;
         }
         catch (e) {
@@ -148,65 +119,86 @@ export class TransactionUsecase implements ITransactionUsecase {
     async getTransactionById(id: string): Promise<Transaction | undefined> {
         return await this.repo.getById(id);
     }
-    async update(data: Transaction): Promise<boolean> {
-        return new Promise(async (resolve,reject) => {
-            try{
-                await this.delete(data.id);
-                await this.insert(data);
-                resolve(true);
-            }
-            catch(e){
-                logger.error(e);
-                reject(false)
-            }
-        });
-    }
-    async insert(data: Transaction): Promise<boolean> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let wallet = await this.walletRepo.getById(data.walletId);
 
-                if (wallet !== undefined) {
-                    wallet.balance += data.amount * data.type;
-                    this.walletRepo.update(wallet).then((result) => {
-                        if (result) {
-                            resolve(this.repo.insert(data));
-                        }
-                    })
+    async update(data: Transaction): Promise<boolean> {
+        try {
+            await this.delete(data.id);
+            await this.insert(data);
+
+            return true;
+        }
+        catch (e) {
+            logger.error(e);
+            return false
+        }
+    }
+
+    async insert(data: Transaction): Promise<boolean> {
+        try {
+            if (data.type == 2 && data.destinationWalletId) {
+                let srcWallet = await this.walletRepo.getById(data.walletId);
+                let destWallet = await this.walletRepo.getById(data.destinationWalletId);
+
+                if (srcWallet === undefined || destWallet === undefined) {
+                    return false
+                }
+
+                srcWallet.balance = Number(srcWallet.balance) - Number(data.amount);
+                destWallet.balance = Number(destWallet.balance) + Number(data.amount);
+                data.categoryId = "TRANSFER";
+                if (!data.description) {
+                    data.description = "Transfer from " + srcWallet.name + " to " + destWallet.name;
+                }
+                if (await this.walletRepo.update(srcWallet) && await this.walletRepo.update(destWallet)) {
+                    return await this.repo.insert(data);
                 }
             }
-            catch (e) {
-                logger.error(e)
-                reject(false);
-            }
-        });
+            else {
+                let wallet = await this.walletRepo.getById(data.walletId);
 
+                if (wallet === undefined) {
+                    return false
+                }
+                wallet.balance += data.amount * data.type;
+                if (await this.walletRepo.update(wallet)) {
+                    return await this.repo.insert(data);
+                }
+            }
+        }
+        catch (e) {
+            logger.error(e)
+        }
+        return false;
     }
     async delete(id: string): Promise<boolean> {
-        return new Promise(async (resolve, reject) => {
-            try{
+        try {
             let data = await this.repo.getById(id);
-            if (data !== undefined) {
-                let wallet = await this.walletRepo.getById(data.walletId);
-                if (wallet !== undefined) {
-                    wallet.balance += data.amount * data.type * -1;
-                    this.walletRepo.update(wallet).then((result) => {
-                        if (result) {
-                            this.repo.delete(data?.id).then((result) => {
-                                if (result) {
-                                    resolve(true);
-                                }
-                            }).catch(()=>{reject(false)})
-                        }
-                    })
+            if (data === undefined) {
+                return false
+            }
+            if (data.type == 2 && data.destinationWalletId) {
+                let srcWallet = await this.walletRepo.getById(data.walletId);
+                let destWallet = await this.walletRepo.getById(data.destinationWalletId);
+                if (srcWallet && destWallet) {
+                    srcWallet.balance = Number(srcWallet.balance) + Number(data.amount);
+                    destWallet.balance = Number(destWallet.balance) - Number(data.amount);
+                    if (await this.walletRepo.update(srcWallet) && await this.walletRepo.update(destWallet)) {
+                        return await this.repo.delete(data?.id);
+                    }
                 }
             }
+            let wallet = await this.walletRepo.getById(data.walletId);
+            if (wallet !== undefined) {
+                wallet.balance += data.amount * data.type * -1;
+                if (await this.walletRepo.update(wallet)) {
+                    return await this.repo.delete(data?.id);
+                }
             }
-            catch(e){
-                logger.error(e);
-                reject(false);
-            }
-        });
+        }
+        catch (e) {
+            logger.error(e);
+            return false;
+        }
+        return false;
     }
-
 }

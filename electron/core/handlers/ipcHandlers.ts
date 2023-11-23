@@ -31,7 +31,11 @@ ipcMain.handle("list:wallet", () => {
     return walletUc.getAllWallets();
 });
 
-ipcMain.handle("list:transaction", () => {
+ipcMain.handle("list:transaction", (_event, args) => {
+    if (args !== undefined) {
+        let req = JSON.parse(args);
+        return transactionUc.getAllTransactions(new Date(req.startDate), new Date(req.endDate));
+    }
     return transactionUc.getAllTransactions();
 });
 
@@ -48,10 +52,10 @@ ipcMain.handle("get:dashboard", async (_event, args) => {
         let req = JSON.parse(args);
         let startPeriod = new Date(req.start);
         let endPeriod = new Date(req.end);
-        let result: DashboardResponse = {};
+        let result: DashboardResponse = {startPeriod:startPeriod,endPeriod:endPeriod,totalFund:0,totalIncome:0,totalSpendings:0};
 
         let transactions = await transactionUc.getTransactions(startPeriod, endPeriod)
-        if (transactions && transactions.length > 0) {
+        if (transactions && !(transactions instanceof Error) && transactions.length > 0) {
 
             result.totalIncome = transactions.reduce((sum: number, element: Transaction) => {
                 if (element.type == 1) {
@@ -79,7 +83,10 @@ ipcMain.handle("get:dashboard", async (_event, args) => {
                     res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
                     spendingsArr.push(res[value.category.id]);
                 }
-                res[value.category.id].amount += Number(value.amount);
+                if (res[value.category.id] !== undefined){
+                    res[value.category.id].amount += Number(value.amount);
+                }
+                
                 return res;
             }, {});
 
@@ -115,7 +122,7 @@ ipcMain.handle("get:dashboard", async (_event, args) => {
         return result;
     } catch (e) {
         logger.error(e)
-        logger.exceptions.getTrace(e)
+        logger.error(e.stack)
     }
 })
 
@@ -159,6 +166,9 @@ ipcMain.handle("insert:transaction", (_event, args) => {
     }
     let req = JSON.parse(args) as Transaction;
     let model = new Transaction({ description: req.description, createdAt: new Date() }, req.amount, req.type, req.walletId, req.categoryId, req.transactionDate);
+    if (req.destinationWalletId) {
+        model.destinationWalletId = req.destinationWalletId;
+    }
     return transactionUc.insert(model);
 });
 

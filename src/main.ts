@@ -8,6 +8,8 @@ import VueApexCharts from 'vue3-apexcharts';
 import VueTablerIcons from 'vue-tabler-icons';
 import Maska from 'maska';
 import { setupCalendar } from 'v-calendar';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css'
 
 createApp(App)
 .use(router)
@@ -17,5 +19,6 @@ createApp(App)
 .use(VueApexCharts)
 .use(vuetify)
 .use(setupCalendar,{})
+.component('VueDatePicker', VueDatePicker)
 .mount('#app')
 .$nextTick(() => postMessage({ payload: 'removeLoading' }, '*'))

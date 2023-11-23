@@ -4,7 +4,7 @@ import { app} from 'electron';
 
 // Contains constants for this project
 
-export const appDirectory = path.join(app.getPath("documents"), pkg.name);
+export const appDirectory = app.isPackaged ? path.join(app.getPath("documents"), pkg.name):path.join(app.getPath("documents"), pkg.name,"dev");
 
 export const TRX_TYPE_SPENDING = -1
 export const TRX_TYPE_INCOME = 1
