@@ -56,7 +56,7 @@
     "webpack": "^5.89.0",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1",
-    "yup": "^0.32.11"
+    "yup": "^1.3.3"
   },
   "devDependencies": {
     "@mdi/font": "^6.9.96",
