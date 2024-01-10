@@ -11,7 +11,7 @@ import { Wallet } from "../models/Wallet";
 import { Transaction } from "../models/Transaction";
 import { WALLET_TYPES, appDirectory } from "../common/constants";
 import { logger } from "../util/logging/winston";
-import { ChartData, DashboardResponse } from "../models/Dashboard";
+import { ChartData, Charts, DashboardResponse } from "../models/Dashboard";
 
 
 const db = JsonDB.getInstance();
@@ -47,14 +47,13 @@ ipcMain.handle("list:wallet-types", () => {
     return WALLET_TYPES;
 })
 
-ipcMain.handle("get:dashboard", async (_event, args) => {
+ipcMain.handle("get:dashboard", async () => {
     try {
-        let req = JSON.parse(args);
-        let startPeriod = new Date(req.start);
-        let endPeriod = new Date(req.end);
-        let result: DashboardResponse = {startPeriod:startPeriod,endPeriod:endPeriod,totalFund:0,totalIncome:0,totalSpendings:0};
+        let today = new Date();
+        let startOfMonth = new Date(today.getFullYear(),today.getMonth(),1);
+        let result: DashboardResponse = {startPeriod:startOfMonth,endPeriod:today,totalFund:0,totalIncome:0,totalSpendings:0};
 
-        let transactions = await transactionUc.getTransactions(startPeriod, endPeriod)
+        let transactions = await transactionUc.getTransactions(startOfMonth, today)
         if (transactions && !(transactions instanceof Error) && transactions.length > 0) {
 
             result.totalIncome = transactions.reduce((sum: number, element: Transaction) => {
@@ -75,7 +74,7 @@ ipcMain.handle("get:dashboard", async (_event, args) => {
 
             let spendingsArr: any[] = [];
             let incomeArr: any[] = [];
-            transactions.reduce(function (res, value) {
+            let trx = transactions.reduce(function (res:any, value:Transaction) {
                 if (value.category.type == 1 && !res[value.category.id]) {
                     res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
                     incomeArr.push(res[value.category.id]);
@@ -104,8 +103,13 @@ ipcMain.handle("get:dashboard", async (_event, args) => {
                 incomeChartData.colors.push(obj.color);
             });
 
-            result.incomeChart = incomeChartData;
-            result.spendingChart = spendingsChartData;
+            let chartResult:Charts = {
+                period:startOfMonth,
+                incomeChart: incomeChartData,
+                spendingChart: spendingsChartData
+            }
+
+            result.chart = chartResult;
         }
 
 
@@ -119,10 +123,72 @@ ipcMain.handle("get:dashboard", async (_event, args) => {
             result.wallets = wallets;
             result.currency = wallets[0].currency;
         }
+
+        let firstLastTransactions = await transactionUc.getFirstAndLastTransaction();
+        if (firstLastTransactions) {
+            result.minDate = new Date(firstLastTransactions[0].transactionDate);
+            result.maxDate = new Date(firstLastTransactions[1].transactionDate);
+        }
         return result;
     } catch (e) {
         logger.error(e)
         logger.error(e.stack)
+    }
+})
+
+ipcMain.handle("get:chart", async (_event,args) => {
+    try {
+        let req = JSON.parse(args);
+        let startDate = new Date(req.startDate);
+        let endDate = new Date(req.endDate);
+
+        let transactions = await transactionUc.getTransactions(startDate, endDate)
+        if (transactions && !(transactions instanceof Error) && transactions.length > 0) {
+
+            let spendingsArr: any[] = [];
+            let incomeArr: any[] = [];
+            let trx = transactions.reduce(function (res:any, value:Transaction) {
+                if (value.category.type == 1 && !res[value.category.id]) {
+                    res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
+                    incomeArr.push(res[value.category.id]);
+                } else if (value.category.type == -1 && !res[value.category.id]) {
+                    res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
+                    spendingsArr.push(res[value.category.id]);
+                }
+                if (res[value.category.id] !== undefined){
+                    res[value.category.id].amount += Number(value.amount);
+                }
+                
+                return res;
+            }, {});
+
+            let spendingsChartData: ChartData = { colors: [], data: [], labels: [] };
+            let incomeChartData: ChartData = { colors: [], data: [], labels: [] };
+
+            spendingsArr.forEach(function (obj: any) {
+                spendingsChartData.labels.push(obj.categoryName);
+                spendingsChartData.data.push(obj.amount);
+                spendingsChartData.colors.push(obj.color);
+            });
+            incomeArr.forEach(function (obj) {
+                incomeChartData.labels.push(obj.categoryName);
+                incomeChartData.data.push(obj.amount);
+                incomeChartData.colors.push(obj.color);
+            });
+
+            let chartResult:Charts = {
+                period:startDate,
+                incomeChart: incomeChartData,
+                spendingChart: spendingsChartData
+            }
+
+            let result:Charts = chartResult;
+
+            return result
+        }
+    }
+    catch(e) {
+        logger.error(e)
     }
 })
 

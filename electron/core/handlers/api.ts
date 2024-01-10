@@ -10,7 +10,8 @@ const getCategory = (categoryId:string) => ipcRenderer.invoke("get:category",cat
 const getWallet = (walletId: string) => ipcRenderer.invoke("get:wallet",walletId);
 const getTransaction = (transactionId: string) => ipcRenderer.invoke("get:transaction",transactionId);
 const getCurrency = (code: string) => ipcRenderer.invoke("get:currency",code);
-const getDashboard = (param:any) => ipcRenderer.invoke("get:dashboard", param);
+const getDashboard = () => ipcRenderer.invoke("get:dashboard");
+const getChart = (args:any) => ipcRenderer.invoke("get:chart",args)
 
 const insertCategory = (data: any) => ipcRenderer.invoke("insert:category", data);
 const insertWallet = (data: any) => ipcRenderer.invoke("insert:wallet", data);
@@ -35,6 +36,7 @@ export const API = {
     getTransaction,
     getCurrency,
     getDashboard,
+    getChart,
     insertCategory,
     insertWallet,
     insertTransaction,

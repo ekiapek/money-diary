@@ -7,4 +7,5 @@ export interface ITransactionUsecase{
     update(data: Transaction): Promise<boolean>;
     insert(data: Transaction): Promise<boolean>;
     delete(id: string): Promise<boolean>;
+    getFirstAndLastTransaction(): Promise<Transaction[]>;
 }

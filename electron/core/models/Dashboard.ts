@@ -11,7 +11,16 @@ export type DashboardResponse = {
     recentTransactions?:Transaction[],
     spendingChart?: ChartData,
     incomeChart?: ChartData,
-    currency?:string
+    chart?: Charts,
+    currency?:string,
+    minDate?:Date,
+    maxDate?:Date
+}
+
+export type Charts = {
+    period: Date,
+    spendingChart?: ChartData,
+    incomeChart?: ChartData,
 }
 
 export type ChartData = {

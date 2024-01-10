@@ -201,4 +201,18 @@ export class TransactionUsecase implements ITransactionUsecase {
         }
         return false;
     }
+    async getFirstAndLastTransaction(): Promise<Transaction[]> {
+        let result:Transaction[] = [];
+        try {
+            let transactions = await this.repo.getAll();
+            
+            transactions = transactions.sort((x:Transaction,y:Transaction) => (new Date(x.transactionDate) < new Date(y.transactionDate) ? -1 : 1));
+            result.push(transactions[0]);
+            result.push(transactions[transactions.length - 1]);
+        } catch (e) {
+            logger.error(e);
+            throw new Error("Failed to get transactions");
+        }
+        return result;
+    }
 }
