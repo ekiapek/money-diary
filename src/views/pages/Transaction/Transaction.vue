@@ -68,7 +68,7 @@
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
-          <p>{{ data.transactions.length > 1 ? data.transactions.length + " transactions" : data.transactions.length + "transaction" }}</p>
+          <p>{{ data.transactions.length > 1 ? data.transactions.length + " transactions" : data.transactions.length + " transaction" }}</p>
         </v-card-actions>
       </v-card>
     </v-col>
