@@ -26,7 +26,7 @@
     "@types/uuid": "^9.0.7",
     "@vue/compiler-sfc": "^3.3.4",
     "@vuepic/vue-datepicker": "^7.4.0",
-    "apexcharts": "3.42.0",
+    "apexcharts": "3.46.0",
     "currencies.json": "^1.0.2",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.10",
