@@ -13,12 +13,14 @@
     "dist"
   ],
   "mac": {
+    "publish": ["github"],
     "artifactName": "${productName}_${version}.${ext}",
     "target": [
       "dmg"
     ]
   },
   "win": {
+    "publish": ["github"],
     "target": [
       {
         "target": "nsis",
