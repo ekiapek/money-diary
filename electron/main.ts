@@ -1,8 +1,20 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 
 import "./core/handlers/ipcHandlers";
 import { JsonDB } from './core/util/db/json';
+
+import electronUpdater, { type AppUpdater } from 'electron-updater';
+
+export function getAutoUpdater(): AppUpdater {
+   // Using destructuring to access autoUpdater due to the CommonJS module of 'electron-updater'.
+   // It is a workaround for ESM compatibility issues, see https://github.com/electron-userland/electron-builder/issues/7976.
+   const { autoUpdater } = electronUpdater;
+   return autoUpdater;
+}
+
+const sqlite = require("sqlite-electron");
+
 const url = require('url');
 // The built directory structure
 //
@@ -48,11 +60,12 @@ function createWindow() {
     //   })
     // );
   }
+
+  getAutoUpdater().checkForUpdatesAndNotify();
 }
 
 app.on('window-all-closed', () => {
   win = null;
-  JsonDB.getInstance().persistData();
   app.quit();
 })
 

@@ -66,7 +66,7 @@
                   :title="item?.raw?.name"
                   :subtitle="item?.raw?.symbolNative"
                 ></v-list-item></template></v-autocomplete>
-            <v-text-field class="mb-4" v-model="wallet.balance" label="Balance" variant="outlined" @focus="removeInitialZero" @input="removeLeadingZero" @keypress="onlyNumberInput"></v-text-field>
+            <CurrencyInput class="mb-4" v-model="wallet.balance" label="Balance" variant="outlined"></CurrencyInput >
             <v-textarea v-model="wallet.description" label="Description" variant="outlined"></v-textarea>
 
           </v-form>
@@ -89,11 +89,13 @@ import { Wallet } from '../../../../electron/core/models/Wallet';
 import EmojiPicker from '@/components/emoji/EmojiPicker.vue';
 import ColorPicker from '@/components/color/ColorPicker.vue';
 import { formatCurrency } from '@/util/currency';
+import CurrencyInput from '@/components/input/CurrencyInput.vue';
 
 export default {
   components: {
     "EmojiPicker": EmojiPicker,
-    "ColorPicker": ColorPicker
+    "ColorPicker": ColorPicker,
+    CurrencyInput,
   },
   data() {
     return {

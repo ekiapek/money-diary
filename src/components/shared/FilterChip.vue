@@ -37,6 +37,7 @@ export default {
                 filterOpts.endDate = date.set('date',date.daysInMonth()).toDate();
             }
             this.$emit("setFilter",filterOpts);
+            this.filterMenu = false;
         }
     }
 };
