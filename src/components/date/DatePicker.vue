@@ -16,8 +16,8 @@ export default {
     data() {
     return {
       dateMenu: false,
-      dateValue: this.modelValue !== undefined ? this.date : new Date(),
-      dateString: this.modelValue !== undefined ? dayjs(this.date).format("DD/MM/YYYY") : dayjs().format("DD/MM/YYYY"),
+      dateValue: this.modelValue !== undefined ? this.modelValue : new Date(),
+      dateString: this.modelValue !== undefined ? dayjs(this.modelValue).format("DD/MM/YYYY") : dayjs().format("DD/MM/YYYY"),
     };
   },
   computed: {

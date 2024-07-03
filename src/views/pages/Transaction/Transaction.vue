@@ -174,9 +174,8 @@
               </template>
             </v-select>
 
-            <v-text-field class="mb-4" v-model="transaction.amount" label="Amount" variant="outlined"
-              :prefix="currencyPrefix" :rules="[rules.required]" @focus="removeInitialZero" @input="removeLeadingZero"
-              @keypress="onlyNumberInput"></v-text-field>
+            <CurrencyInput class="mb-4" v-model="transaction.amount" label="Amount" variant="outlined"
+              :currencyLogo="currencyPrefix"></CurrencyInput >
 
             <v-textarea v-model="transaction.description" label="Description" variant="outlined"></v-textarea>
 
@@ -184,7 +183,7 @@
         </v-card-text>
         <v-card-actions class="pa-5 justify-end">
           <v-btn class="px-5" @click="transactionDialog = false" variant="tonal" color="muted">Cancel</v-btn>
-          <v-btn v-if="transaction.createdAt" class="px-5" @click="deleteObj(transaction)" variant="tonal"
+          <v-btn v-if="transaction?.createdAt" class="px-5" @click="deleteObj(transaction)" variant="tonal"
             color="error">Delete</v-btn>
           <v-btn class="px-8" type="submit" @click.stop="saveTransaction()" variant="tonal" color="primary">Save</v-btn>
         </v-card-actions>
@@ -197,18 +196,21 @@
   </v-row>
 </template>
 <script lang="ts">
-import { Transaction } from '../../../../electron/core/models/Transaction';
+import { Transaction } from '../../../types/models/Transaction';
+import { Base } from '../../../types/models/Base';
 import { formatCurrency } from '@/util/currency';
 import DatePicker from '@/components/date/DatePicker.vue';
 import MonthPicker from '@/components/date/MonthPicker.vue';
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/css/index.css';
 import FilterChip from '@/components/shared/FilterChip.vue';
+import CurrencyInput from '@/components/input/CurrencyInput.vue';
 
 export default {
   components: {
     "DatePicker": DatePicker,
     "MonthPicker": MonthPicker,
+    CurrencyInput,
     Loading,
     FilterChip,
   },
@@ -219,15 +221,16 @@ export default {
       spendingCategories: [],
       wallets: [],
       destWallets: [],
-      transactions: undefined,
+      transactions: undefined as any|undefined,
       transactionDialog: false,
-      transaction: null,
+      transaction: null as Transaction|null,
       snackbar: false,
       dialogTitle: "",
       snackbarColor: "primary",
       snackbarMsg: "",
       categoryLoading: false,
       currencyPrefix: "",
+      currency: {code:"USD"},
       userLocale: navigator.language,
       isLoading:false,
       dateOption: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
@@ -274,7 +277,7 @@ export default {
     },
     addItem() {
       this.transactionDialog = true;
-      this.transaction = new Transaction({}, undefined, undefined, undefined, undefined);
+      this.transaction = new Transaction({} as Base, undefined, undefined, undefined, undefined);
       this.dialogTitle = "Add new transaction";
     },
     editItem(item: any) {
@@ -292,10 +295,10 @@ export default {
       })
     },
     saveTransaction() {
-      this.$refs.transactionForm.validate().then((result) => {
+      this.$refs.transactionForm.validate().then((result:any) => {
         if (result.valid) {
-          this.transaction.balance = Number(this.transaction.balance)
-          if (!this.transaction.createdAt) {
+          this.transaction.amount = Number(this.transaction?.amount)
+          if (!this.transaction?.createdAt) {
             this.transaction.createdAt = new Date();
             window.api.insertTransaction(JSON.stringify(this.transaction)).then((response) => {
               if (response) {
@@ -341,7 +344,7 @@ export default {
       let id = obj.id;
       this.transaction = obj;
       if (id === undefined) {
-        id = this.transaction.id;
+        id = this.transaction?.id;
       }
       if (confirm("Delete transaction?")) {
         window.api.deleteTransaction(id).then((success) => {
@@ -364,33 +367,16 @@ export default {
         })
       }
     },
-    onlyNumberInput(evt) {
-      evt = (evt) ? evt : window.event;
-      let expect = evt.target.value.toString() + evt.key.toString();
-
-      if (!/^[-+]?[0-9]*\.?[0-9]*$/.test(expect)) {
-        evt.preventDefault();
-      } else {
-        return true;
-      }
-    },
-    removeLeadingZero() {
-      this.transaction.amount = Number(this.transaction.amount).toString();
-    },
-    removeInitialZero() {
-      if (this.transaction.amount == "0") {
-        this.transaction.amount = "";
-      }
-    },
     renderAmountCurrency(walletId: string) {
       window.api.getWallet(walletId).then((wallet) => {
         window.api.getCurrency(wallet.currency).then((response) => {
           this.currencyPrefix = response.symbolNative;
+          this.currency = response;
         })
       })
 
     },
-    setFilter(value) {
+    setFilter(value:any) {
       let args = JSON.stringify(value)
       window.api.listTransactions(args).then((response) => {
         if (response != null) {
@@ -405,13 +391,13 @@ export default {
         this.transaction.destinationWalletId = undefined;
         window.api.getWallet(this.transaction.walletId).then((value) => {
           this.destWallets = this.wallets.filter((obj: any) => {
-            return obj.id != this.transaction.walletId && obj.currency == value.currency;
+            return obj.id != this.transaction?.walletId && obj.currency == value.currency;
           });
         })
         
       }
     },
-    handleTransferSourceWallet(value) {
+    handleTransferSourceWallet(value:any) {
       this.renderAmountCurrency(value);
       this.populateDestWallet();
     }
