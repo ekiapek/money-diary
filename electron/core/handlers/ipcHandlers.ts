@@ -13,7 +13,6 @@ import { WALLET_TYPES, appDirectory } from "../common/constants";
 import { logger } from "../util/logging/winston";
 import { ChartData, Charts, DashboardResponse } from "../models/Dashboard";
 
-
 const db = JsonDB.getInstance();
 const categoryRepo = new CategoryRepository(db);
 const walletRepo = new WalletRepository(db);

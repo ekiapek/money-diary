@@ -69,6 +69,7 @@ export class JsonDB {
         }
         arr.push(data)
         this.data.set(key, arr)
+        this.persistData(key);
     }
 
     public updateData(key: string, data: any): boolean {
@@ -77,6 +78,7 @@ export class JsonDB {
             const index = array.findIndex(prop => prop.id === data.id);
             array[index] = data;
             this.data.set(key, array);
+            this.persistData(key);
             return true;
         }
         throw Error("data not found");
@@ -88,6 +90,7 @@ export class JsonDB {
             const index = array.findIndex(prop => prop.id === id);
             array.splice(index, 1);
             this.data.set(key, array);
+            this.persistData(key);
             return true;
         }
         throw Error("data not found");
@@ -101,6 +104,7 @@ export class JsonDB {
                 fs.writeFile(path.join(dbPath, key + ".json"), jsonString, (err) => {
                     if (err) {
                         logger.error(err);
+                        throw Error("failed to persist data")
                     }
                 })
             })
@@ -113,6 +117,7 @@ export class JsonDB {
             fs.writeFile(path.join(dbPath, key + ".json"), jsonString, (err) => {
                 if (err) {
                     logger.error(err);
+                    throw Error("failed to persist data")
                 }
             })
 
