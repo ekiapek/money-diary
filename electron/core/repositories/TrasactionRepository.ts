@@ -37,7 +37,6 @@ export class TransactionRepository implements ITrasactionRepository{
         return new Promise((resolve, reject) => {
             try {
                 this.db.pushData<Transaction>(this.key, data);
-                this.db.persistData(this.key);
                 resolve(true);
             } catch (error) {
                 logger.error(error);
@@ -49,7 +48,6 @@ export class TransactionRepository implements ITrasactionRepository{
         return new Promise((resolve, reject) => {
             try {
                 this.db.updateData(this.key, data);
-                this.db.persistData(this.key);
                 resolve(true);
             } catch (error) {
                 logger.error(error);
@@ -61,7 +59,6 @@ export class TransactionRepository implements ITrasactionRepository{
         return new Promise((resolve, reject) => {
             try {
                 this.db.removeById(this.key, id);
-                this.db.persistData(this.key);
                 resolve(true);
             } catch (error) {
                 logger.error(error);

@@ -43,7 +43,6 @@ export class CategoryRepository implements ICategoryRepository {
         return new Promise((resolve, reject) => {
             try {
                 this.db.updateData(this.key, data);
-                this.db.persistData(this.key);
                 resolve(true);
             } catch (error) {
                 logger.error(error);
@@ -56,7 +55,6 @@ export class CategoryRepository implements ICategoryRepository {
         return new Promise((resolve, reject) => {
             try {
                 this.db.pushData<Category>(this.key, data);
-                this.db.persistData(this.key);
                 resolve(true);
             } catch (error) {
                 logger.error(error);
@@ -69,7 +67,6 @@ export class CategoryRepository implements ICategoryRepository {
         return new Promise((resolve, reject) => {
             try {
                 this.db.removeById(this.key, id);
-                this.db.persistData(this.key);
                 resolve(true);
             } catch (error) {
                 logger.error(error);
