@@ -13,8 +13,6 @@ export function getAutoUpdater(): AppUpdater {
    return autoUpdater;
 }
 
-const sqlite = require("sqlite-electron");
-
 const url = require('url');
 // The built directory structure
 //
