@@ -48,7 +48,7 @@ export class TransactionUsecase implements ITransactionUsecase {
             result["data"] = resultData;
             return result;
         }
-        catch (e) {
+        catch (e:any) {
             logger.error(e.stack)
             return Error("Failed to load transactions");
         }
@@ -111,7 +111,7 @@ export class TransactionUsecase implements ITransactionUsecase {
 
             return trxResponse;
         }
-        catch (e) {
+        catch (e:any) {
             logger.error(e.stack);
             return Error("Failed to load transactions");
         }
@@ -205,13 +205,14 @@ export class TransactionUsecase implements ITransactionUsecase {
         let result:Transaction[] = [];
         try {
             let transactions = await this.repo.getAll();
-            
+            if (!transactions) {
+                return result;
+            }
             transactions = transactions.sort((x:Transaction,y:Transaction) => (new Date(x.transactionDate) < new Date(y.transactionDate) ? -1 : 1));
             result.push(transactions[0]);
             result.push(transactions[transactions.length - 1]);
         } catch (e) {
-            logger.error(e);
-            throw new Error("Failed to get transactions");
+            logger.error(e);            
         }
         return result;
     }

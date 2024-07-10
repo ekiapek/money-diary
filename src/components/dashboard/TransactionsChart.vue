@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { PropType } from 'vue';
 
 const props = defineProps({
     title:String,
-    chartLabels:[],
-    chartSeries:[],
-    chartColors:[]
+    chartLabels:Array as PropType<string[]>,
+    chartSeries:Array as PropType<any[]>,
+    chartColors:Array as PropType<string[]>
 });
 
 // const select = ref('March 2023');
@@ -57,7 +58,7 @@ const chartOptions = props.chartSeries && props.chartColors && props.chartLabels
                 </div> -->
             </div>
             <div class="mt-6">
-                <apexchart v-if="chartSeries" type="donut" height="370px" :options="chartOptions" :series="props.chartSeries">
+                <apexchart v-if="chartSeries != undefined && chartSeries?.length > 0" type="donut" height="370px" :options="chartOptions" :series="props.chartSeries">
                 </apexchart>
                 <p v-else><i>No data</i></p>
             </div>

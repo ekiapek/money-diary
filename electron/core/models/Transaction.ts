@@ -1,4 +1,4 @@
-import UUID, {UUIDConstructor} from "pure-uuid"
+import UUID from "pure-uuid"
 import { Base } from "./Base";
 import { Category } from "./Category";
 import { Wallet } from "./Wallet";
@@ -15,6 +15,7 @@ export class Transaction {
     createdAt: Date;
     updatedAt?: Date;
     isDeleted?: boolean;
+    category?: Category;
 
     constructor(base: Base, amount: number, type: number, walletId: string, categoryId: string,transactionDate?:Date, destinationWalletId?: string) {
         this.description = base.description;

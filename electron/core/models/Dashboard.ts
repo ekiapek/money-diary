@@ -24,7 +24,7 @@ export type Charts = {
 }
 
 export type ChartData = {
-    labels:[],
-    data:[],
-    colors:[]
+    labels:string[],
+    data:any[],
+    colors:string[]
 }
