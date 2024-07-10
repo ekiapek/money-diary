@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { formatCurrency } from '@/util/currency';
+import { PropType } from 'vue';
 const props = defineProps({
-    transactions:[]
+    transactions:Array as PropType<any[]>
 })
 </script>
 <template>
     <v-card elevation="10" class="withbg">
         <v-card-item class="pb-0">
             <v-card-title class="text-h5 pt-sm-2">Recent Transactions</v-card-title>
-            <div class="mb-5 px-3">
-                <div v-if="props.transactions !== undefined && props.transactions.length > 0" >
+            <div class="mb-5">
+                <div class="mt-6">
+                <div class="px-3" v-if="props.transactions !== undefined && props.transactions.length > 0" >
                     <v-table>
                         <thead>
                         <tr>
@@ -49,6 +51,7 @@ const props = defineProps({
                 <div v-else>
                     <p><i>No data</i></p>
                 </div>
+            </div>
             </div>
         </v-card-item>
     </v-card>

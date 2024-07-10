@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { formatCurrency } from '@/util/currency';
+import { PropType } from 'vue';
 const props = defineProps({
-    wallets: []
+    wallets: Array as PropType<any[]>
 })
 </script>
 <template>
@@ -32,7 +33,7 @@ const props = defineProps({
                 </v-row>
 
                 <v-row v-else>
-                    <v-col class="align-top text-center justify-center"><i>No data</i></v-col>
+                    <v-col class="align-top"><i>No data</i></v-col>
                 </v-row>
 
             </div>

@@ -74,16 +74,18 @@ ipcMain.handle("get:dashboard", async () => {
             let spendingsArr: any[] = [];
             let incomeArr: any[] = [];
             let trx = transactions.reduce(function (res:any, value:Transaction) {
-                if (value.category.type == 1 && !res[value.category.id]) {
-                    res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
-                    incomeArr.push(res[value.category.id]);
-                } else if (value.category.type == -1 && !res[value.category.id]) {
-                    res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
-                    spendingsArr.push(res[value.category.id]);
-                }
-                if (res[value.category.id] !== undefined){
-                    res[value.category.id].amount += Number(value.amount);
-                }
+                if (value.category){
+                    if (value.category.type == 1 && !res[value.category.id]) {
+                        res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
+                        incomeArr.push(res[value.category.id]);
+                    } else if (value.category.type == -1 && !res[value.category.id]) {
+                        res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
+                        spendingsArr.push(res[value.category.id]);
+                    }
+                    if (res[value.category.id] !== undefined){
+                        res[value.category.id].amount += Number(value.amount);
+                    }
+                }                
                 
                 return res;
             }, {});
@@ -124,12 +126,16 @@ ipcMain.handle("get:dashboard", async () => {
         }
 
         let firstLastTransactions = await transactionUc.getFirstAndLastTransaction();
-        if (firstLastTransactions) {
-            result.minDate = new Date(firstLastTransactions[0].transactionDate);
-            result.maxDate = new Date(firstLastTransactions[1].transactionDate);
+        if (firstLastTransactions)  {
+            if (firstLastTransactions.length > 2) {
+                result.minDate = new Date(firstLastTransactions[0].transactionDate);
+                result.maxDate = new Date(firstLastTransactions[1].transactionDate);
+            } else if (firstLastTransactions.length == 1) {
+                result.minDate = new Date(firstLastTransactions[0].transactionDate);
+            }            
         }
         return result;
-    } catch (e) {
+    } catch (e:any) {
         logger.error(e)
         logger.error(e.stack)
     }
@@ -147,16 +153,19 @@ ipcMain.handle("get:chart", async (_event,args) => {
             let spendingsArr: any[] = [];
             let incomeArr: any[] = [];
             let trx = transactions.reduce(function (res:any, value:Transaction) {
-                if (value.category.type == 1 && !res[value.category.id]) {
-                    res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
-                    incomeArr.push(res[value.category.id]);
-                } else if (value.category.type == -1 && !res[value.category.id]) {
-                    res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
-                    spendingsArr.push(res[value.category.id]);
+                if (value.category){
+                    if (value.category.type == 1 && !res[value.category.id]) {
+                        res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
+                        incomeArr.push(res[value.category.id]);
+                    } else if (value.category.type == -1 && !res[value.category.id]) {
+                        res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
+                        spendingsArr.push(res[value.category.id]);
+                    }
+                    if (res[value.category.id] !== undefined){
+                        res[value.category.id].amount += Number(value.amount);
+                    }
                 }
-                if (res[value.category.id] !== undefined){
-                    res[value.category.id].amount += Number(value.amount);
-                }
+                
                 
                 return res;
             }, {});
