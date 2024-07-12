@@ -37,6 +37,7 @@ function createWindow() {
     height:800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      devTools: !app.isPackaged,
     },
   })
 
@@ -59,6 +60,10 @@ function createWindow() {
     // );
   }
 
+  if(app.dock) {
+    app.dock.hide();
+  }
+  win.setMenu(null); 
   getAutoUpdater().checkForUpdatesAndNotify();
 }
 
