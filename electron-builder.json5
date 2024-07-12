@@ -12,15 +12,18 @@
     "dist-electron",
     "dist"
   ],
+  "publish": {
+      "provider": "github",
+      "owner": "ekiapek",
+      "releaseType": "release"
+  },
   "mac": {
-    "publish": ["github"],
     "artifactName": "${productName}_${version}.${ext}",
     "target": [
       "dmg"
     ]
   },
   "win": {
-    "publish": ["github"],
     "target": [
       {
         "target": "nsis",
