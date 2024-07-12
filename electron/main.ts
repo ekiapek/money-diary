@@ -1,15 +1,17 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
-
+import { logger } from './core/util/logging/winston';
 import "./core/handlers/ipcHandlers";
 import { JsonDB } from './core/util/db/json';
 
-import electronUpdater, { type AppUpdater } from 'electron-updater';
+import electronUpdater, { type AppUpdater,autoUpdater } from 'electron-updater';
 
 export function getAutoUpdater(): AppUpdater {
    // Using destructuring to access autoUpdater due to the CommonJS module of 'electron-updater'.
    // It is a workaround for ESM compatibility issues, see https://github.com/electron-userland/electron-builder/issues/7976.
    const { autoUpdater } = electronUpdater;
+   autoUpdater.logger = logger;
+   autoUpdater.checkForUpdatesAndNotify();
    return autoUpdater;
 }
 
@@ -64,7 +66,8 @@ function createWindow() {
     app.dock.hide();
   }
   win.setMenu(null); 
-  getAutoUpdater().checkForUpdatesAndNotify();
+  // autoUpdater.checkForUpdatesAndNotify();
+  getAutoUpdater();
 }
 
 app.on('window-all-closed', () => {
