@@ -72,7 +72,7 @@ export class TransactionUsecase implements ITransactionUsecase {
             let trxResponse: any[] = [];
             transactions.forEach(function (obj) {
                 let trx: any = { ...obj };
-                let category = categories.find((x: Category) => { return x.id == obj.categoryId });
+                let category = categories ? categories.find((x: Category) => { return x.id == obj.categoryId }):undefined;
                 let wallet = wallets.find((x: Wallet) => { return x.id == obj.walletId })
                 trx["wallet"] = wallet;
                 trx["category"] = category;
@@ -135,8 +135,14 @@ export class TransactionUsecase implements ITransactionUsecase {
 
     async insert(data: Transaction): Promise<boolean> {
         try {
+            let wallet = await this.walletRepo.getById(data.walletId);
+
+            if (wallet === undefined) {
+                return false
+            }
+
             if (data.type == 2 && data.destinationWalletId) {
-                let srcWallet = await this.walletRepo.getById(data.walletId);
+                let srcWallet = wallet
                 let destWallet = await this.walletRepo.getById(data.destinationWalletId);
 
                 if (srcWallet === undefined || destWallet === undefined) {
@@ -154,11 +160,6 @@ export class TransactionUsecase implements ITransactionUsecase {
                 }
             }
             else {
-                let wallet = await this.walletRepo.getById(data.walletId);
-
-                if (wallet === undefined) {
-                    return false
-                }
                 wallet.balance += data.amount * data.type;
                 if (await this.walletRepo.update(wallet)) {
                     return await this.repo.insert(data);

@@ -41,7 +41,6 @@ export class JsonDB {
                             logger.info(data)
                             let jsonData = JSON.parse(data);
                             let key = path.parse(fileName).name
-                            logger.info(key)
                             this._instance.data.set(key, jsonData);
                         });
                     } catch {

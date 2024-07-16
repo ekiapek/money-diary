@@ -209,7 +209,8 @@ ipcMain.handle("get:wallet", (_event, args) => {
 });
 
 ipcMain.handle("get:transaction", (_event, args) => {
-    return transactionUc.getTransactionById(args);
+    let data = transactionUc.getTransactionById(args);
+    return data;
 });
 
 ipcMain.handle("get:currency", (_event, args) => {
