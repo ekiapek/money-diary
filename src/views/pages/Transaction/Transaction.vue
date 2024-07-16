@@ -90,7 +90,7 @@
               <v-select class="mb-4" v-model="transaction.walletId" variant="outlined" label="Select Wallet" item-value="id"
               item-title="name" disabled :items="wallets" :menu-props="{ maxHeight: '200px' }">
               </v-select>
-          </div>
+            </div>
             <div v-else-if="transaction.type == 2">
               <v-select class="mb-4" v-model="transaction.walletId" variant="outlined" label="Select Source Wallet" item-value="id"
               item-title="name" :items="wallets" :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }"
@@ -106,8 +106,7 @@
               </template>
               </v-select>
 
-              <v-select class="mb-4" v-model="transaction.destinationWalletId" variant="outlined" label="Select Destination Wallet" item-value="id"
-              item-title="name" :items="destWallets" :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }">
+              <v-select class="mb-4" v-model="transaction.destinationWalletId" variant="outlined" label="Select Destination Wallet" item-value="id" item-title="name" :items="destWallets" :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }">
               <template v-slot:item="{ props, item }">
                 <v-list-item v-bind="props" :title="item?.raw?.name" :subtitle="item?.raw?.currency">
                   <template v-slot:prepend>
@@ -205,6 +204,7 @@ import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/css/index.css';
 import FilterChip from '@/components/shared/FilterChip.vue';
 import CurrencyInput from '@/components/input/CurrencyInput.vue';
+import dayjs from 'dayjs';
 
 export default {
   components: {
@@ -283,11 +283,20 @@ export default {
     editItem(item: any) {
       this.isLoading = true;
       window.api.getTransaction(item.id).then((result) => {
+        if (!result) {
+          return;
+        }
         this.isLoading = false;
         this.transactionDialog = true;
         this.transaction = result;
+        this.transaction.transactionDate = dayjs(this.transaction?.transactionDate).toDate();
         this.dialogTitle = "Edit transaction";
         this.renderAmountCurrency(result.walletId);
+        if (this.transaction != null && this.transaction.type == 2 && this.transaction.walletId !== undefined) {   
+          this.destWallets = this.wallets.filter((obj: any) => {
+            return obj.id != this.transaction?.walletId;
+          });
+      }
       })
       .catch(() => {
         this.snackbarColor = "error";
@@ -389,12 +398,10 @@ export default {
     populateDestWallet() {
       if (this.transaction != null && this.transaction.type == 2 && this.transaction.walletId !== undefined) {
         this.transaction.destinationWalletId = undefined;
-        window.api.getWallet(this.transaction.walletId).then((value) => {
+   
           this.destWallets = this.wallets.filter((obj: any) => {
-            return obj.id != this.transaction?.walletId && obj.currency == value.currency;
+            return obj.id != this.transaction?.walletId;
           });
-        })
-        
       }
     },
     handleTransferSourceWallet(value:any) {

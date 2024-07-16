@@ -13,8 +13,6 @@ watch(
   (value) => {
     if (value) {
       setValue(value as number);
-    } else {
-      setValue(0);
     }
 
   }

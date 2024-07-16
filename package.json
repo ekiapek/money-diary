@@ -1,5 +1,6 @@
 {
   "name": "wheres-my-money",
+  "productName":"Where's My Money",
   "author": {
     "name": "Yeheskiel Andrazein",
     "url": "https://github.com/ekiapek"
@@ -10,7 +11,7 @@
   },
   "description": "Know where your money go by logging your transactions.",
   "private": true,
-  "version": "0.9.6",
+  "version": "0.9.7",
   "scripts": {
     "dev": "vite",
     "build": "vite build && electron-builder -p always",

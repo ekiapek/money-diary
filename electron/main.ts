@@ -51,22 +51,17 @@ function createWindow() {
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
-    // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))
-    // win.loadURL(
-    //   url.format({
-    //     pathname: path.join(__dirname, `/dist/index.html`),
-    //     protocol: "file:",
-    //     slashes: true
-    //   })
-    // );
   }
 
   if(app.dock) {
     app.dock.hide();
   }
-  win.setMenu(null); 
-  // autoUpdater.checkForUpdatesAndNotify();
+
+  if (app.isPackaged) {
+    win.setMenu(null); 
+  }
+  
   getAutoUpdater();
 }
 
