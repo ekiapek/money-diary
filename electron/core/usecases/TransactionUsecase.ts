@@ -26,10 +26,10 @@ export class TransactionUsecase implements ITransactionUsecase {
     /**
      * Retrieve all transactions in date range and group them by date.
     */
-    async getAllTransactions(from?: Date, to?: Date): Promise<Transaction[] | Error> {
+    async getAllTransactions(from?: Date, to?: Date, walletId?: string, categoryId?: string): Promise<Transaction[] | Error> {
         try {
             let result: any = {};
-            let trxResponse = await this.getTransactions(from, to);
+            let trxResponse = await this.getTransactions(from, to, walletId, categoryId);
 
             let transactions = JsonDB.groupBy(trxResponse, (x: Transaction) => x.transactionDate.toLocaleDateString());
 
@@ -46,6 +46,16 @@ export class TransactionUsecase implements ITransactionUsecase {
 
             resultData = resultData.sort((x, y) => x.date > y.date ? -1 : 1);
             result["data"] = resultData;
+
+            let firstLastTransactions = await this.getFirstAndLastTransaction();
+            if (firstLastTransactions)  {
+                    result["minDate"] = new Date(firstLastTransactions[0].transactionDate);
+                    result["maxDate"] = new Date();
+            }
+
+            result["activePeriod"] = from;
+            logger.info(JSON.stringify(result));
+
             return result;
         }
         catch (e:any) {
@@ -58,8 +68,9 @@ export class TransactionUsecase implements ITransactionUsecase {
     /**
      * Retrieve all transactions in date range.
     */
-    async getTransactions(from?: Date, to?: Date): Promise<Transaction[] | Error> {
+    async getTransactions(from?: Date, to?: Date, walletId?: string, categoryId?: string): Promise<Transaction[] | Error> {
         try {
+            // get all required data
             let transactions = await this.repo.getAll();
             let categories = await this.categoryRepo.getAll();
             let wallets = await this.walletRepo.getAll();
@@ -70,8 +81,10 @@ export class TransactionUsecase implements ITransactionUsecase {
 
 
             let trxResponse: any[] = [];
+            
+            // join the data from wallet and category
             transactions.forEach(function (obj) {
-                let trx: any = { ...obj };
+                let trx: any = { ...obj };   
                 let category = categories ? categories.find((x: Category) => { return x.id == obj.categoryId }):undefined;
                 let wallet = wallets.find((x: Wallet) => { return x.id == obj.walletId })
                 trx["wallet"] = wallet;
@@ -95,6 +108,7 @@ export class TransactionUsecase implements ITransactionUsecase {
                 trxResponse.push(trx);
             });
 
+            // filter the data
             if (from !== undefined) {
                 trxResponse = trxResponse.filter((obj: Transaction) => {
                     return obj.transactionDate.getTime() > from.getTime();
@@ -104,6 +118,18 @@ export class TransactionUsecase implements ITransactionUsecase {
             if (to !== undefined) {
                 trxResponse = trxResponse.filter((obj: Transaction) => {
                     return obj.transactionDate.getTime() < to.getTime();
+                })
+            }
+
+            if (walletId !== undefined) {
+                trxResponse = trxResponse.filter((obj: Transaction) => {
+                    return obj.walletId == walletId;
+                })
+            }
+
+            if (categoryId !== undefined) {
+                trxResponse = trxResponse.filter((obj: Transaction) => {
+                    return obj.categoryId == categoryId;
                 })
             }
 

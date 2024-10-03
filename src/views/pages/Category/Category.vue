@@ -22,23 +22,11 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
                 @click="addItem(-1)">Add new</v-btn>
             </div>
           </div>
-          <v-container class="">
-            <v-row justify="start">
+          <v-container fluid>
+            <v-row >
               <v-col v-if="spendings.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
               <v-col v-else v-for="cat in spendings" :key="cat.id" cols="3">
-                <v-card elevation="10" @click="editItem(cat)">
-                  <div class="py-5 px-4">
-                    <v-row justify="start">
-                      <v-col cols="2" class="mx-2 item-icon align-center text-center"
-                        :style="{ 'background-color': cat.color, 'border-radius': '50%', 'min-width': '48px', 'min-height': '48px' }">
-                        <h4>{{ cat.icon }}</h4>
-                      </v-col>
-                      <v-col class="pl-2">
-                        <h5>{{ cat.name }} </h5>
-                      </v-col>
-                    </v-row>
-                  </div>
-                </v-card>
+                <CategoryItem :category="cat" @click="editItem(cat)" />
               </v-col>
             </v-row>
           </v-container>
@@ -64,23 +52,11 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
                 @click="addItem(1)">Add new</v-btn>
             </div>
           </div>
-          <v-container class="">
-            <v-row justify="start">
+          <v-container fluid>
+            <v-row>
               <v-col v-if="income.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
               <v-col v-else v-for="cat in income" :key="cat.id" cols="3">
-                <v-card elevation="10" @click="editItem(cat)">
-                  <div class="py-5 px-4">
-                    <v-row justify="start">
-                      <v-col cols="2" class="mx-2 item-icon align-center text-center"
-                        :style="{ 'background-color': cat.color, 'border-radius': '50%', 'min-width': '48px', 'min-height': '48px' }">
-                        <h4>{{ cat.icon }}</h4>
-                      </v-col>
-                      <v-col class="pl-2">
-                        <h5>{{ cat.name }} </h5>
-                      </v-col>
-                    </v-row>
-                  </div>
-                </v-card>
+                <CategoryItem :category="cat" @click="editItem(cat)" />
               </v-col>
             </v-row>
           </v-container>
@@ -108,7 +84,8 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
         </v-card-text>
         <v-card-actions class="pa-5 justify-end">
           <v-btn class="px-5" @click="categoryDialog = false" variant="tonal" color="muted">Cancel</v-btn>
-          <v-btn v-if="category.createdAt" class="px-5" @click="deleteObj()" variant="tonal" color="error">Delete</v-btn>
+          <v-btn v-if="category.createdAt" class="px-5" @click="deleteObj()" variant="tonal"
+            color="error">Delete</v-btn>
           <v-btn class="px-8" @click="save()" variant="tonal" color="primary">Save</v-btn>
         </v-card-actions>
       </v-card>
@@ -123,11 +100,13 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
 import { Category } from '../../../../electron/core/models/Category';
 import EmojiPicker from '@/components/emoji/EmojiPicker.vue';
 import ColorPicker from '@/components/color/ColorPicker.vue';
+import CategoryItem from '@/components/cards/CategoryItem.vue';
 
 export default {
   components: {
     "EmojiPicker": EmojiPicker,
-    "ColorPicker": ColorPicker
+    "ColorPicker": ColorPicker,
+    "CategoryItem": CategoryItem
   },
   data() {
     return {
