@@ -33,7 +33,8 @@ ipcMain.handle("list:wallet", () => {
 ipcMain.handle("list:transaction", (_event, args) => {
     if (args !== undefined) {
         let req = JSON.parse(args);
-        return transactionUc.getAllTransactions(new Date(req.startDate), new Date(req.endDate));
+        logger.info(req)
+        return transactionUc.getAllTransactions(new Date(req.startDate), new Date(req.endDate), req.walletId, req.categoryId);
     }
     return transactionUc.getAllTransactions();
 });
@@ -127,13 +128,12 @@ ipcMain.handle("get:dashboard", async () => {
 
         let firstLastTransactions = await transactionUc.getFirstAndLastTransaction();
         if (firstLastTransactions)  {
-            if (firstLastTransactions.length > 2) {
+            
                 result.minDate = new Date(firstLastTransactions[0].transactionDate);
-                result.maxDate = new Date(firstLastTransactions[1].transactionDate);
-            } else if (firstLastTransactions.length == 1) {
-                result.minDate = new Date(firstLastTransactions[0].transactionDate);
-            }            
+                result.maxDate = new Date();
+                     
         }
+        
         return result;
     } catch (e:any) {
         logger.error(e)

@@ -11,27 +11,11 @@
         </div>
       </v-row>
 
-      <v-container class="">
-        <v-row justify="start">
+      <v-container fluid>
+        <v-row>
           <v-col v-if="wallets.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
           <v-col v-else v-for="item in wallets" :key="item.id" cols="4">
-            <v-card elevation="10" @click="editItem(item)">
-              <v-container class="py-3 px-4">
-                <v-row class="align-center" justify="start">
-                  <v-col cols="1" class="ml-2 item-icon align-center text-center"
-                    :style="{ 'background-color': item.color, 'border-radius': '50%', 'min-width': '64px', 'min-height': '64px' }">
-                    <h2>{{ item.icon }}</h2>
-                  </v-col>
-                  <v-col class="mx-2">
-                    
-                      <h3>{{ item.name }} </h3>
-                      <h4>{{ formatCurrency(item.balance,item.currency) }}</h4>
-                      <p>{{ item.type + " Wallet" }}</p>
-                    
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card>
+            <WalletItem :wallet="item" @click="editItem(item)" />
           </v-col>
         </v-row>
       </v-container>
@@ -90,11 +74,13 @@ import EmojiPicker from '@/components/emoji/EmojiPicker.vue';
 import ColorPicker from '@/components/color/ColorPicker.vue';
 import { formatCurrency } from '@/util/currency';
 import CurrencyInput from '@/components/input/CurrencyInput.vue';
+import WalletItem from '@/components/cards/WalletItem.vue';
 
 export default {
   components: {
     "EmojiPicker": EmojiPicker,
     "ColorPicker": ColorPicker,
+    "WalletItem": WalletItem,
     CurrencyInput,
   },
   data() {
