@@ -1,4 +1,4 @@
-import UUID, {UUIDConstructor} from "pure-uuid"
+import UUID from "pure-uuid"
 import { Base } from "./Base";
 
 export class Wallet{
@@ -15,10 +15,10 @@ export class Wallet{
     isDeleted?: boolean;
     
     constructor(base: Base, currency:string, balance: number,type:string) {
-        this.name = base.name;
+        this.name = base.name ? base.name: "";
         this.description = base.description;
-        this.icon = base.icon;
-        this.color = base.color;
+        this.icon = base.icon ? base.icon: "";
+        this.color = base.color ? base.color: "#f5f5f5";
         this.balance = balance;
         this.currency = currency;
         this.type = type;

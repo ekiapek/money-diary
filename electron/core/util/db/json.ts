@@ -27,9 +27,9 @@ export class JsonDB {
             fs.mkdirSync(dbPath, { recursive: true });
         } else {
             // load data from json files
-            let fileNames = fs.readdirSync(dbPath).filter(file => file.match(/\.json$/));
+            let fileNames = fs.readdirSync(dbPath).filter(file => RegExp(/\.json$/).exec(file));
             fileNames.forEach((fileName: string) => {
-                let typeName = fileName.match(/(^.*?)\.json/);
+                let typeName = RegExp(/(^.*?)\.json/).exec(fileName);
                 if (typeName) {
                     let filePath = path.join(dbPath, fileName)
                     try {

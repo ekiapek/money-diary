@@ -1,7 +1,6 @@
 import UUID from "pure-uuid"
 import { Base } from "./Base";
 import { Category } from "./Category";
-import { Wallet } from "./Wallet";
 
 export class Transaction {
     id: string;
@@ -27,7 +26,7 @@ export class Transaction {
         this.createdAt = base.createdAt;
         this.updatedAt = base.updatedAt;
         this.destinationWalletId = destinationWalletId;
-        this.transactionDate = transactionDate ? transactionDate : this.createdAt;
+        this.transactionDate = transactionDate || this.createdAt;
         this.isDeleted = base.isDeleted; 
     }
 }

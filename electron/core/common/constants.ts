@@ -17,3 +17,10 @@ export const WALLET_TYPE_SAVINGS = "saving"
 export const WALLET_TYPE_INVESTMENT = "investment"
 
 export const WALLET_TYPES = ["Regular","Saving","Investment"]
+
+export const BUDGET_RESET_FREQUENCY_MONTHLY = "monthly"
+export const BUDGET_RESET_FREQUENCY_WEEKLY = "weekly"
+export const BUDGET_RESET_FREQUENCY_DAILY = "daily"
+
+export const BUDGET_RESET_UNIT_DAY_WEEK = "dow"
+export const BUDGET_RESET_UNIT_DAY_MONTH = "dom"

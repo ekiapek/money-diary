@@ -4,9 +4,9 @@ import { Wallet } from "./Wallet";
 export type DashboardResponse = {
     startPeriod?:Date,
     endPeriod?:Date,
-    totalFund?:Number,
-    totalIncome?:Number,
-    totalSpendings?:Number,
+    totalFund?:number,
+    totalIncome?:number,
+    totalSpendings?:number,
     wallets?:Wallet[],
     recentTransactions?:Transaction[],
     spendingChart?: ChartData,
