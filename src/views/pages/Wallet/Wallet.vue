@@ -12,9 +12,28 @@
       </v-row>
 
       <v-container fluid>
+        <h3 class="mb-3">Regular Wallets</h3>
         <v-row>
-          <v-col v-if="wallets.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
-          <v-col v-else v-for="item in wallets" :key="item.id" cols="4">
+          <v-col v-if="regularWallets.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+          <v-col v-else v-for="item in regularWallets" :key="item.id" cols="4">
+            <WalletItem :wallet="item" @click="editItem(item)" />
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-container fluid>
+        <h3 class="mb-3">Savings Wallets</h3>
+        <v-row>
+          <v-col v-if="savingsWallets.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+          <v-col v-else v-for="item in savingsWallets" :key="item.id" cols="4">
+            <WalletItem :wallet="item" @click="editItem(item)" />
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-container fluid>
+        <h3 class="mb-3">Investment Wallets</h3>
+        <v-row>
+          <v-col v-if="investmentWallets.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+          <v-col v-else v-for="item in investmentWallets" :key="item.id" cols="4">
             <WalletItem :wallet="item" @click="editItem(item)" />
           </v-col>
         </v-row>
@@ -34,14 +53,14 @@
         <v-card-text class="">
           <v-container>
             <v-row class="mb-3">
-              <EmojiPicker :emoji="wallet.icon" :color=pickerColor @emojiChanged="onChangeEmoji" />
+              <EmojiPicker :emoji="wallet?.icon" :color=pickerColor @emojiChanged="onChangeEmoji" />
               <ColorPicker class="mx-6" :colorProps="pickerColor" @colorChanged="onChangeColor" />
             </v-row>
           </v-container>
           <v-form ref="walletForm" lazy-validation>
             <v-text-field v-model="wallet.name" class="mb-4" label="Wallet name" variant="outlined"
               :rules="[rules.required]"></v-text-field>
-              <v-select v-model="wallet.type" class="mb-4" label="Type" variant="outlined" :items="walletTypes" :rules="[rules.required]"></v-select>
+            <v-select v-model="wallet.type" class="mb-4" label="Type" variant="outlined" :items="walletTypes" :rules="[rules.required]"></v-select>
             <v-autocomplete v-model="wallet.currency" class="mb-4" item-value="code" item-title="name" label="Currency" variant="outlined"
               :menu-props="{ maxHeight: '200px' }" :items="currencies" :rules="[rules.required]"
               ><template v-slot:item="{ props, item }">
@@ -57,7 +76,7 @@
         </v-card-text>
         <v-card-actions class="pa-5 justify-end">
           <v-btn class="px-5" @click="walletDialog = false" variant="tonal" color="muted">Cancel</v-btn>
-          <v-btn v-if="wallet.createdAt" class="px-5" @click="deleteObj()" variant="tonal" color="error">Delete</v-btn>
+          <v-btn v-if="wallet?.createdAt" class="px-5" @click="deleteObj()" variant="tonal" color="error">Delete</v-btn>
           <v-btn class="px-8" type="submit" @click.stop="saveWallet()" variant="tonal" color="primary">Save</v-btn>
         </v-card-actions>
       </v-card>
@@ -69,12 +88,12 @@
   </v-row>
 </template>
 <script lang="ts">
-import { Wallet } from '../../../../electron/core/models/Wallet';
-import EmojiPicker from '@/components/emoji/EmojiPicker.vue';
-import ColorPicker from '@/components/color/ColorPicker.vue';
-import { formatCurrency } from '@/util/currency';
-import CurrencyInput from '@/components/input/CurrencyInput.vue';
-import WalletItem from '@/components/cards/WalletItem.vue';
+import { Wallet,WALLET_TYPE_REGULAR, WALLET_TYPE_SAVINGS, WALLET_TYPE_INVESTMENT } from "../../../types/models/Wallet";
+import EmojiPicker from "@/components/emoji/EmojiPicker.vue";
+import ColorPicker from "@/components/color/ColorPicker.vue";
+import { formatCurrency } from "@/util/currency";
+import CurrencyInput from "@/components/input/CurrencyInput.vue";
+import WalletItem from "@/components/cards/WalletItem.vue";
 
 export default {
   components: {
@@ -86,10 +105,12 @@ export default {
   data() {
     return {
       currencies: [],
-      wallets: [],
-      walletTypes: [],
+      regularWallets: [] as Wallet[],
+      savingsWallets: [] as Wallet[],
+      investmentWallets: [] as Wallet[],
+      walletTypes: [] as string[],
       walletDialog: false,
-      wallet: null,
+      wallet: undefined as Wallet|undefined,
       snackbar: false,
       dialogTitle: "",
       emojisOutput: "",
@@ -98,8 +119,7 @@ export default {
       snackbarColor: "primary",
       snackbarMsg: "",
       rules: {
-        required: value => !!value || "This field is required",
-        email: v => /.+@.+\..+/.test(v) || "Must be a valid email"
+        required: value => !!value || "This field is required"
       }
     };
   },
@@ -112,37 +132,46 @@ export default {
     loadData() {
       window.api.listWallets().then((response) => {
         if (response) {
-          this.wallets = response;
+          response.forEach((item:Wallet) => {
+            if (item.type.toLowerCase() == WALLET_TYPE_REGULAR) {
+              this.regularWallets.push(item);
+            } else if (item.type.toLowerCase() == WALLET_TYPE_SAVINGS) {
+              this.savingsWallets.push(item);
+            } else if (item.type.toLowerCase() == WALLET_TYPE_INVESTMENT) {
+              this.investmentWallets.push(item);
+            }
+          });
         }
       });
       window.api.listWalletTypes().then((response) => {
-        this.walletTypes =response;
-      })
+        console.log(response);
+        this.walletTypes = response;
+      });
     },
     loadCurrencies() {
       window.api.listCurrencies().then((response) => {
         this.currencies = response;
-      })
+      });
     },
     populateSelectCurrencies(item: any) {
       return {
         title: item.name + " (" + item.code + ")",
         subtitle: item.symbol,
         value: item.code
-      }
+      };
     },
-    customFilter(queryText, item) {
-      const textOne = item.raw.name.toLowerCase()
-      const textTwo = item.raw.code.toLowerCase()
-      const searchText = queryText.toLowerCase()
+    customFilter(queryText:string, item:any) {
+      const textOne = item.raw.name.toLowerCase();
+      const textTwo = item.raw.code.toLowerCase();
+      const searchText = queryText.toLowerCase();
 
       return textOne.indexOf(searchText) > -1 ||
-        textTwo.indexOf(searchText) > -1
+        textTwo.indexOf(searchText) > -1;
     },
     addItem() {
       this.walletDialog = true;
       this.wallet = new Wallet({}, undefined, "", "");
-      this.dialogTitle = "Add new wallet"
+      this.dialogTitle = "Add new wallet";
       this.pickerColor = this.generateHex();
     },
     editItem(item: any) {
@@ -183,7 +212,7 @@ export default {
                 this.snackbarMsg = "Successfully edited wallet";
                 this.snackbarColor = "success";
                 this.snackbar = true;
-                this.loadData()
+                this.loadData();
               } else {
                 this.snackbarMsg = "Failed to edit wallet";
                 this.snackbarColor = "error";
@@ -191,11 +220,11 @@ export default {
               }
             }).catch(() => {
               this.snackbarMsg = "Failed to edit wallet";
-              this.snackbarColor = "error"
+              this.snackbarColor = "error";
               this.snackbar = true;
             });
           }
-          this.walletDialog = false
+          this.walletDialog = false;
         }
       });
 

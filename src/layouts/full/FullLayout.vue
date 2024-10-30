@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router';
-// import VerticalSidebarVue from './vertical-sidebar/VerticalSidebar.vue';
-// import VerticalHeaderVue from './vertical-header/VerticalHeader.vue';
-import MainView from './Main.vue';
+import { RouterView } from "vue-router";
+// import VerticalSidebarVue from "./vertical-sidebar/VerticalSidebar.vue";
+// import VerticalHeaderVue from "./vertical-header/VerticalHeader.vue";
+import MainView from "./Main.vue";
+import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 </script>
 <template>
     <v-locale-provider>
@@ -11,21 +12,23 @@ import MainView from './Main.vue';
             <VerticalHeaderVue  /> -->
             <MainView />
             <v-main class="bg-grey">
+
                 <v-container fluid class="page-wrapper">
-                    <div class="maxWidth">
-                        <RouterView v-slot="{ Component, route }">
-                            <transition name="slide-x-transition" mode="out-in">
-                                <component :is="Component" :key="route.path" />
-                            </transition>
-                        </RouterView>
-                    </div>
+                        <div class="maxWidth">
+                            <RouterView v-slot="{ Component, route }">
+                                <transition name="slide-x-transition" mode="out-in">
+                                    <component :is="Component" :key="route.path" />
+                                </transition>
+                            </RouterView>
+                        </div>
                 </v-container>
+
             </v-main>
         </v-app>
     </v-locale-provider>
 </template>
 <style>
-.bg-grey{
+.bg-grey {
     background: rgb(var(--v-theme-grey100));
 }
 </style>

@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue';
-import sidebarItems from './vertical-sidebar/sidebarItem';
-import NavGroup from './vertical-sidebar/NavGroup/index.vue';
-import NavItem from './vertical-sidebar/NavItem/index.vue';
-import Logo from './logo/Logo.vue';
+import { ref, shallowRef } from "vue";
+import sidebarItems from "./vertical-sidebar/sidebarItem";
+import NavGroup from "./vertical-sidebar/NavGroup/index.vue";
+import NavItem from "./vertical-sidebar/NavItem/index.vue";
+import Logo from "./logo/Logo.vue";
 // Icon Imports
-import { Menu2Icon } from 'vue-tabler-icons';
+import { Menu2Icon } from "vue-tabler-icons";
 // dropdown imports
-import NotificationDD from './vertical-header/NotificationDD.vue';
-import ProfileDD from './vertical-header/ProfileDD.vue';
+// import NotificationDD from "./vertical-header/NotificationDD.vue";
+// import ProfileDD from "./vertical-header/ProfileDD.vue";
 const sidebarMenu = shallowRef(sidebarItems);
 const sDrawer = ref(true);
 </script>
@@ -24,7 +24,7 @@ const sDrawer = ref(true);
         <!---Navigation -->
         <!-- ---------------------------------------------- -->
         <div>
-        <perfect-scrollbar class="scrollnavbar">
+        <PerfectScrollbar class="scrollnavbar">
             <v-list class="pa-6">
                 <!---Menu Loop -->
                 <template v-for="(item, i) in sidebarMenu">
@@ -36,7 +36,7 @@ const sDrawer = ref(true);
                     <!---End Single Item-->
                 </template>
             </v-list>
-        </perfect-scrollbar>
+        </PerfectScrollbar>
     </div>
 
     </v-navigation-drawer>

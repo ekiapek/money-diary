@@ -1,47 +1,50 @@
-import { defineConfig } from 'vite'
-import electron from 'vite-plugin-electron'
-import renderer from 'vite-plugin-electron-renderer'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from "vite";
+import electron from "vite-plugin-electron";
+import renderer from "vite-plugin-electron-renderer";
+import vue from "@vitejs/plugin-vue";
 import { fileURLToPath, URL } from "url";
 import vuetify from "vite-plugin-vuetify";
-import { resolve } from 'node:path';
+import { resolve } from "node:path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   define:{
-    'process.env':process.env
+    "process.env":process.env
   },
   ssr:{
     external: ["mock-aws-s3", "aws-sdk", "nock","uuid"],
-    target:'node'
+    target:"node"
   },
   plugins: [
     vue(),
     vuetify({
       autoImport: true,
+      // styles: {
+      //   configFile: "src/scss/style.scss"
+      // }
       //styles: "expose",
     }),
     electron([
       {
         // Main-Process entry file of the Electron App.
-        entry: 'electron/main.ts',
+        entry: "electron/main.ts",
         vite:{
           resolve: {
             alias: {
                // Your other aliases if you have some
-              "aws-sdk": resolve(__dirname, 'src/main/empty.ts'),
-              "mock-aws-s3": resolve(__dirname, 'src/main/empty.ts'),
-              "nock": resolve(__dirname, 'src/main/empty.ts')
+              "aws-sdk": resolve(__dirname, "src/main/empty.ts"),
+              "mock-aws-s3": resolve(__dirname, "src/main/empty.ts"),
+              "nock": resolve(__dirname, "src/main/empty.ts")
             },
           }
         }
       },
       {
-        entry: 'electron/preload.ts',
+        entry: "electron/preload.ts",
         onstart(options) {
           // Notify the Renderer-Process to reload the page when the Preload-Scripts build is complete, 
           // instead of restarting the entire Electron App.
-          options.reload()
+          options.reload();
         },
       },
     ]),
@@ -54,13 +57,15 @@ export default defineConfig({
   },
   css: {
     preprocessorOptions: {
-      scss: {},
+      scss: {
+        api: "modern",
+      },
     },
   },
   optimizeDeps: {
-    exclude: ['vuetify'],
+    exclude: ["vuetify"],
     entries: [
-      './src/**/*.vue',
+      "./src/**/*.vue",
     ],
   },
   build:{
@@ -68,4 +73,4 @@ export default defineConfig({
       external:["mock-aws-s3", "aws-sdk", "nock","uuid","crypto"]
     }
   }
-})
+});

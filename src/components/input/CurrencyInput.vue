@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useCurrencyInput,CurrencyDisplay } from 'vue-currency-input';
-import { watch } from 'vue';
+import { useCurrencyInput,CurrencyDisplay } from "vue-currency-input";
+import { watch } from "vue";
 
 const props = defineProps({ modelValue: Number, currencyLogo: String });
 

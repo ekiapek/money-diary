@@ -11,7 +11,7 @@
   </v-menu>
 </template>
 <script>
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 export default {
     data() {
     return {
@@ -23,11 +23,11 @@ export default {
   computed: {
     get() {
       this.modelValue = this.modelValue !== undefined ? this.modelValue : this.dateValue;
-      return this.modelValue
+      return this.modelValue;
     },
     set(value) {
-      emit('update:modelValue', value)
-    }
+      emit("update:modelValue", value);
+    },
   },
   props: {
     modelValue: Date,
@@ -46,7 +46,7 @@ export default {
       this.dateValue = value;
       this.dateString = dayjs(this.dateValue).format("DD/MM/YYYY");
       this.dateMenu = false;
-      this.$emit('update:modelValue', this.dateValue);
+      this.$emit("update:modelValue", this.dateValue);
     }
   },
 };
