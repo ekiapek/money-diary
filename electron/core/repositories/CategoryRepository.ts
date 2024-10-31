@@ -19,7 +19,7 @@ export class CategoryRepository implements ICategoryRepository {
     getAll(): Promise<Category[]> {
         return new Promise((resolve, reject) => {
             try {
-                let data = this.db.getData<Category>(this.key)
+                let data = this.db.getData<Category>(this.key);
                 resolve(data);
             } catch (error) {
                 reject(error);
