@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { PropType } from 'vue';
+import { computed, PropType } from "vue";
 
 const props = defineProps({
     title:String,
@@ -9,15 +8,15 @@ const props = defineProps({
     chartColors:Array as PropType<string[]>
 });
 
-// const select = ref('March 2023');
-// const items = ref(['March 2023', 'April 2023', 'May 2023']);
+// const select = ref("March 2023");
+// const items = ref(["March 2023", "April 2023", "May 2023"]);
 const chartOptions = props.chartSeries && props.chartColors && props.chartLabels ? computed(() => {
     return {
         labels: props.chartLabels,
         chart: {
-            type: 'donut',
-            fontFamily: `inherit`,
-            foreColor: '#a1aab2',
+            type: "donut",
+            fontFamily: "inherit",
+            foreColor: "#a1aab2",
             toolbar: {
                 show: false
             }
@@ -28,8 +27,8 @@ const chartOptions = props.chartSeries && props.chartColors && props.chartLabels
                 startAngle: 0,
                 endAngle: 360,
                 donut: {
-                    size: '60%',
-                    background: 'transparent'
+                    size: "60%",
+                    background: "transparent"
                 }
             }
         },
@@ -48,7 +47,7 @@ const chartOptions = props.chartSeries && props.chartColors && props.chartLabels
 }):undefined;
 </script>
 <template>
-    <v-card elevation="10" class="withbg">
+    <v-card elevation="3" class="withbg">
         <v-card-item>
             <div class="d-sm-flex align-center justify-space-between pt-sm-2">
                 <div><v-card-title class="text-h5">{{title}}</v-card-title></div>

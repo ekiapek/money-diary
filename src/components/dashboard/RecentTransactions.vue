@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { formatCurrency } from '@/util/currency';
-import { PropType } from 'vue';
+import { formatCurrency } from "@/util/currency";
+import { PropType } from "vue";
 const props = defineProps({
     transactions:Array as PropType<any[]>
-})
+});
 </script>
 <template>
-    <v-card elevation="10" class="withbg">
+    <v-card elevation="3" class="withbg">
         <v-card-item class="pb-0">
             <v-card-title class="text-h5 pt-sm-2">Recent Transactions</v-card-title>
             <div class="mb-5">

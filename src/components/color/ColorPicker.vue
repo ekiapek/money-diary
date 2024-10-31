@@ -21,22 +21,22 @@ export default {
     },
     data() {
         return {
-            color: this.colorProps ? this.colorProps : '#1976D2FF',
-            mask: '!#XXXXXXXX',
+            color: this.colorProps ? this.colorProps : "#1976D2FF",
+            mask: "!#XXXXXXXX",
             menu: false,
-        }
+        };
     },
     computed: {
         swatchStyle() {
-            const { color, menu } = this
+            const { color, menu } = this;
             return {
                 backgroundColor: color,
-                cursor: 'pointer',
-                height: '30px',
-                width: '30px',
-                borderRadius: menu ? '50%' : '4px',
-                transition: 'border-radius 200ms ease-in-out'
-            }
+                cursor: "pointer",
+                height: "30px",
+                width: "30px",
+                borderRadius: menu ? "50%" : "4px",
+                transition: "border-radius 200ms ease-in-out"
+            };
         }
     },
     watch: {
@@ -44,5 +44,5 @@ export default {
             this.$emit("colorChanged",this.color);
         }
     }
-}
+};
 </script>

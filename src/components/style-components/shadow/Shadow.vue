@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UiParentCard from '@/components/shared/UiParentCard.vue';
+import UiParentCard from "@/components/shared/UiParentCard.vue";
 </script>
 <template>
     <UiParentCard title="Shadow">

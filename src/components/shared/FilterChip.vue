@@ -49,9 +49,9 @@
     </v-menu>
 </template>
 <script lang="ts">
-import MonthPicker from '../date/MonthPicker.vue';
-import { TransactionFilter } from '../../types/Filter.ts';
-import dayjs from 'dayjs';
+import MonthPicker from "../date/MonthPicker.vue";
+import { TransactionFilter } from "../../types/Filter.ts";
+import dayjs from "dayjs";
 export default {
     components: {
         MonthPicker,
@@ -74,8 +74,8 @@ export default {
             let filterOpts: TransactionFilter = {};
             if (this.filterDate !== undefined) {
                 let date = dayjs(this.filterDate);
-                filterOpts.startDate = date.set('date', 1).toDate();
-                filterOpts.endDate = date.set('date', date.daysInMonth()).toDate();
+                filterOpts.startDate = date.set("date", 1).toDate();
+                filterOpts.endDate = date.set("date", date.daysInMonth()).toDate();
             }
 
             filterOpts.walletId = this.selectedWallet;

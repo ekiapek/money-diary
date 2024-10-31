@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { Category } from '@/types/models/Category';
-import { PropType } from 'vue';
+import { Category } from "@/types/models/Category";
+import { PropType } from "vue";
 const props = defineProps({
     category: Category as PropType<Category>
-})
+});
 </script>
 <template>
-    <v-card class="py-3 px-3 d-flex align-center" elevation="10" height="100%">
+    <v-card class="py-3 px-3 d-flex align-center" elevation="3" height="100%">
         <v-row no-gutters class="align-center ">
             <v-col class="mr-sm-2 d-flex justify-center">
                 <v-avatar size="x-large" height="100%" class="text-white" variant="flat" :color="category?.color">

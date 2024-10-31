@@ -29,10 +29,10 @@
         </div>
       </v-row>
 
-      <v-card v-if="transactions === undefined || transactions.length == 0" elevation="10" class="mb-5 align-top text-center justify-center pa-3">
+      <v-card v-if="transactions === undefined || transactions.length == 0" elevation="3" class="mb-5 align-top text-center justify-center pa-3">
         <p><i>No transaction found in this month. Start by adding a new transaction.</i></p>
       </v-card>
-      <v-card v-else v-for="data in transactions" elevation="10" class="withbg mb-7">
+      <v-card v-else v-for="data in transactions" elevation="3" class="withbg mb-7">
         <!-- {{transactions[key]}} -->
         <v-card-item>
           <v-card-title class="text-h5">{{ new Date(data.date).toLocaleDateString(userLocale, dateOption)

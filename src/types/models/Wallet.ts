@@ -1,4 +1,4 @@
-import UUID from "pure-uuid"
+import UUID from "pure-uuid";
 import { Base } from "./Base";
 
 export class Wallet{
@@ -28,3 +28,7 @@ export class Wallet{
         this.isDeleted = base.isDeleted;        
     }
 }
+
+export const WALLET_TYPE_REGULAR = "regular";
+export const WALLET_TYPE_SAVINGS = "saving";
+export const WALLET_TYPE_INVESTMENT = "investment";

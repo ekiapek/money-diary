@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { Wallet } from '@/types/models/Wallet';
-import { PropType } from 'vue';
-import { formatCurrency } from '@/util/currency';
+import { Wallet } from "@/types/models/Wallet";
+import { PropType } from "vue";
+import { formatCurrency } from "@/util/currency";
 const props = defineProps({
     wallet: Wallet as PropType<Wallet>
-})
+});
 
 let balance = props.wallet?.balance ?? 0;
 let currency = props.wallet?.currency ?? "USD";
 </script>
 <template>
-    <v-card class="py-3 pr-3 d-flex align-center" elevation="10" height="100%">
+    <v-card class="py-3 pr-3 d-flex align-center" elevation="3" height="100%">
         <v-row no-gutters class="align-center">
             <v-col class="d-flex justify-center">
                 <v-avatar size="x-large" height="100%" class="text-white" variant="flat" :color="wallet?.color">

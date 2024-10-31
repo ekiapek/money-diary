@@ -4,7 +4,7 @@
             <v-col cols="12">
                 <v-row class="align-center justify-space-between">
                     <v-col>
-                        <v-card elevation="10">
+                        <v-card elevation="3">
                             <v-card-item>
                                 <div class="d-flex align-center">
                                     <v-avatar size="large" color="primary" icon="mdi-cash-multiple"></v-avatar>
@@ -21,7 +21,7 @@
                         </v-card>
                     </v-col>
                     <v-col>
-                        <v-card elevation="10">
+                        <v-card elevation="3">
                             <v-card-item>
                                 <div class="d-flex align-center">
                                     <v-avatar size="large" color="success" icon="mdi-currency-usd"></v-avatar>
@@ -39,7 +39,7 @@
                         </v-card>
                     </v-col>
                     <v-col>
-                        <v-card elevation="10">
+                        <v-card elevation="3">
                             <v-card-item>
                                 <div class="d-flex align-center">
                                     <v-avatar size="large" color="error" icon="mdi-currency-usd"></v-avatar>

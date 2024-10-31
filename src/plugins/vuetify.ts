@@ -1,21 +1,17 @@
-import { createVuetify } from 'vuetify';
-import '@mdi/font/css/materialdesignicons.css';
-import * as components from 'vuetify/components';
-import * as directives from 'vuetify/directives';
-import { PurpleTheme} from '@/theme/LightTheme';
-import { VDatePicker } from 'vuetify/labs/components';
-import DayJsAdapter from '@date-io/dayjs';
-import { VSkeletonLoader } from 'vuetify/labs/VSkeletonLoader'
+import { createVuetify } from "vuetify";
+// import "vuetify/styles";
+import "@/scss/style.scss";
+import "@mdi/font/css/materialdesignicons.css";
+import * as directives from "vuetify/directives";
+import * as components from "vuetify/components";
+import { PurpleTheme } from "@/theme/LightTheme";
+import DayJsAdapter from "@date-io/dayjs";
 
 export default createVuetify({
-    components:{
-        VDatePicker,
-        VSkeletonLoader
-    },
     directives,
-
+    components,
     theme: {
-        defaultTheme: 'PurpleTheme',
+        defaultTheme: "PurpleTheme",
         themes: {
             PurpleTheme,
         }
@@ -23,14 +19,14 @@ export default createVuetify({
     defaults: {
         VBtn: {},
         VCard: {
-            rounded: 'md'
+            rounded: "md"
         },
         VTextField: {
-            rounded: 'lg'
+            rounded: "lg"
         },
         VTooltip: {
             // set v-tooltip default location to top
-            location: 'top'
+            location: "top"
         }
     },
     date: {

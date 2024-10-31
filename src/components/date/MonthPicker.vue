@@ -11,8 +11,7 @@
   </v-menu>
 </template>
 <script>
-import dayjs from 'dayjs';
-import { TrafficLightsIcon } from 'vue-tabler-icons';
+import dayjs from "dayjs";
 export default {
     data() {
     return {
@@ -35,7 +34,7 @@ export default {
       }, 200);
     },
     selectDate(value) {
-      let newDate = new Date()
+      let newDate = new Date();
       newDate.setTime(0);
       newDate.setDate(1);
       newDate.setMonth(value.month);
@@ -43,7 +42,7 @@ export default {
       this.dateValue = value;
       this.dateString = dayjs(newDate).format("MMMM YYYY");
       this.dateMenu = false;
-      this.$emit('update:modelValue', newDate);
+      this.$emit("update:modelValue", newDate); 
     }
   },
 };

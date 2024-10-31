@@ -4,7 +4,7 @@
       <h2 class="text-h2 mb-6 pl-7 pt-7 font-weight-bold" style="color: black; font-weight: bold;">
         Category</h2>
       <p class="mb-6 pl-7">Categorizing your cashflow can impact to better financial management!</p>
-      <v-card elevation="10" class="withbg" style='background: hsla(210, 44%, 96%, 1);
+      <v-card elevation="0" class="withbg" style='background: hsla(210, 44%, 96%, 1);
 
 background: linear-gradient(315deg, hsla(210, 44%, 96%, 1) 0%, hsla(0, 100%, 93%, 1) 100%);
 
@@ -34,7 +34,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
       </v-card>
 
 
-      <v-card elevation="10" class="withbg"
+      <v-card elevation="0" class="withbg"
         style='background: hsla(210, 44%, 96%, 1);
 
 background: linear-gradient(315deg, hsla(210, 44%, 96%, 1) 0%, hsla(207, 100%, 93%, 1) 100%);
