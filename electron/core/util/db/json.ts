@@ -3,7 +3,7 @@ import fs from "fs";
 import { logger } from "../logging/winston";
 import { appDirectory } from "../../common/constants";
 
-const dbPath = path.join(appDirectory, '/data');
+const dbPath = path.join(appDirectory, "/data");
 
 export class JsonDB {
     private static _instance: JsonDB;
@@ -31,16 +31,16 @@ export class JsonDB {
             fileNames.forEach((fileName: string) => {
                 let typeName = fileName.match(/(^.*?)\.json/);
                 if (typeName) {
-                    let filePath = path.join(dbPath, fileName)
+                    let filePath = path.join(dbPath, fileName);
                     try {
-                        fs.readFile(filePath, 'utf8', (err, data) => {
+                        fs.readFile(filePath, "utf8", (err, data) => {
                             if (err) {
                                 logger.error(err);
                             }
-                            logger.info(fileName)
-                            logger.info(data)
+                            logger.info(fileName);
+                            logger.info(data);
                             let jsonData = JSON.parse(data);
-                            let key = path.parse(fileName).name
+                            let key = path.parse(fileName).name;
                             this._instance.data.set(key, jsonData);
                         });
                     } catch {
@@ -62,12 +62,12 @@ export class JsonDB {
     }
 
     public pushData<T>(key: string, data: any) {
-        let arr = this.data.get(key)
+        let arr = this.data.get(key);
         if (!arr) {
             arr = new Array<T>();
         }
-        arr.push(data)
-        this.data.set(key, arr)
+        arr.push(data);
+        this.data.set(key, arr);
         this.persistData(key);
     }
 
@@ -103,10 +103,10 @@ export class JsonDB {
                 fs.writeFile(path.join(dbPath, key + ".json"), jsonString, (err) => {
                     if (err) {
                         logger.error(err);
-                        throw Error("failed to persist data")
+                        throw Error("failed to persist data");
                     }
-                })
-            })
+                });
+            });
         } else {
             let records = this.data.get(key);
             if (!records) {
@@ -116,9 +116,9 @@ export class JsonDB {
             fs.writeFile(path.join(dbPath, key + ".json"), jsonString, (err) => {
                 if (err) {
                     logger.error(err);
-                    throw Error("failed to persist data")
+                    throw Error("failed to persist data");
                 }
-            })
+            });
 
         }
     }

@@ -144,7 +144,6 @@ export default {
         }
       });
       window.api.listWalletTypes().then((response) => {
-        console.log(response);
         this.walletTypes = response;
       });
     },
