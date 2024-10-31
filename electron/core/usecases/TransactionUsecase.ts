@@ -235,12 +235,17 @@ export class TransactionUsecase implements ITransactionUsecase {
         let result:Transaction[] = [];
         try {
             let transactions = await this.repo.getAll();
-            if (!transactions) {
+            if (!transactions || transactions.length < 1) {
                 return result;
             }
             transactions = transactions.sort((x:Transaction,y:Transaction) => (new Date(x.transactionDate) < new Date(y.transactionDate) ? -1 : 1));
+            if (transactions.length > 2) {
             result.push(transactions[0]);
             result.push(transactions[transactions.length - 1]);
+            } else {
+                result.push(transactions[0]);
+                result.push(transactions[0]);
+            }
         } catch (e) {
             logger.error(e);            
         }
