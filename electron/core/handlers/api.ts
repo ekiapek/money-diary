@@ -11,7 +11,7 @@ const getWallet = (walletId: string) => ipcRenderer.invoke("get:wallet",walletId
 const getTransaction = (transactionId: string) => ipcRenderer.invoke("get:transaction",transactionId);
 const getCurrency = (code: string) => ipcRenderer.invoke("get:currency",code);
 const getDashboard = () => ipcRenderer.invoke("get:dashboard");
-const getChart = (args:any) => ipcRenderer.invoke("get:chart",args)
+const getChart = (args:any) => ipcRenderer.invoke("get:chart",args);
 
 const insertCategory = (data: any) => ipcRenderer.invoke("insert:category", data);
 const insertWallet = (data: any) => ipcRenderer.invoke("insert:wallet", data);
@@ -46,4 +46,4 @@ export const API = {
     deleteCategory,
     deleteWallet,
     deleteTransaction
-}
+};

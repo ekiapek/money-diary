@@ -6,17 +6,17 @@ import { ITrasactionRepository } from "./interfaces/ITransactionRepository";
 
 export class TransactionRepository implements ITrasactionRepository{
     private db: JsonDB;
-    private key = "transaction"
+    private key = "transaction";
     /**
      *
      */
     constructor(db: JsonDB) {
-        this.db = db
+        this.db = db;
     }
     getAll(): Promise<Transaction[]> {
         return new Promise((resolve, reject) => {
             try {
-                let data = this.db.getData<Transaction>(this.key)
+                let data = this.db.getData<Transaction>(this.key);
                 resolve(data);
             } catch (error) {
                 reject(error);

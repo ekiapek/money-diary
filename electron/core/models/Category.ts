@@ -1,4 +1,4 @@
-import UUID, {UUIDConstructor} from "pure-uuid"
+import UUID from "pure-uuid";
 import { Base } from "./Base";
 
 export class Category{
@@ -16,10 +16,10 @@ export class Category{
      *
      */
     constructor(base:Base,type:number) {
-        this.name = base.name;
+        this.name = base.name ? base.name : "";
         this.description = base.description;
-        this.icon = base.icon;
-        this.color = base.color;
+        this.icon = base.icon ? base.icon : "";
+        this.color = base.color ? base.color : "";
         this.type = type;
         this.id = base.id?base.id:new UUID(4).toString();
         this.createdAt = base.createdAt;

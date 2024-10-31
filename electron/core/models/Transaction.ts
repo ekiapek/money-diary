@@ -1,7 +1,6 @@
-import UUID from "pure-uuid"
+import UUID from "pure-uuid";
 import { Base } from "./Base";
 import { Category } from "./Category";
-import { Wallet } from "./Wallet";
 
 export class Transaction {
     id: string;

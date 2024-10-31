@@ -9,7 +9,7 @@ import { WalletUsecase } from "../usecases/WalletUsecase";
 import { TransactionUsecase } from "../usecases/TransactionUsecase";
 import { Wallet } from "../models/Wallet";
 import { Transaction } from "../models/Transaction";
-import { WALLET_TYPES, appDirectory } from "../common/constants";
+import { WALLET_TYPES } from "../common/constants";
 import { logger } from "../util/logging/winston";
 import { ChartData, Charts, DashboardResponse } from "../models/Dashboard";
 
@@ -20,7 +20,7 @@ const transactionRepo = new TransactionRepository(db);
 const categoryUc = new CategoryUsecase(categoryRepo);
 const walletUc = new WalletUsecase(walletRepo);
 const transactionUc = new TransactionUsecase(transactionRepo, walletRepo, categoryRepo);
-const currencies = require("currencies.json")
+const currencies = require("currencies.json");
 
 ipcMain.handle("list:category", () => {
     return categoryUc.getAllCategories();
@@ -33,7 +33,6 @@ ipcMain.handle("list:wallet", () => {
 ipcMain.handle("list:transaction", (_event, args) => {
     if (args !== undefined) {
         let req = JSON.parse(args);
-        logger.info(req)
         return transactionUc.getAllTransactions(new Date(req.startDate), new Date(req.endDate), req.walletId, req.categoryId);
     }
     return transactionUc.getAllTransactions();
@@ -41,19 +40,19 @@ ipcMain.handle("list:transaction", (_event, args) => {
 
 ipcMain.handle("list:currencies", () => {
     return currencies.currencies;
-})
+});
 
 ipcMain.handle("list:wallet-types", () => {
     return WALLET_TYPES;
-})
+});
 
 ipcMain.handle("get:dashboard", async () => {
     try {
         let today = new Date();
-        let startOfMonth = new Date(today.getFullYear(),today.getMonth(),1);
-        let result: DashboardResponse = {startPeriod:startOfMonth,endPeriod:today,totalFund:0,totalIncome:0,totalSpendings:0};
+        let startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        let result: DashboardResponse = { startPeriod: startOfMonth, endPeriod: today, totalFund: 0, totalIncome: 0, totalSpendings: 0 };
 
-        let transactions = await transactionUc.getTransactions(startOfMonth, today)
+        let transactions = await transactionUc.getTransactions(startOfMonth, today);
         if (transactions && !(transactions instanceof Error) && transactions.length > 0) {
 
             result.totalIncome = transactions.reduce((sum: number, element: Transaction) => {
@@ -74,22 +73,30 @@ ipcMain.handle("get:dashboard", async () => {
 
             let spendingsArr: any[] = [];
             let incomeArr: any[] = [];
-            let trx = transactions.reduce(function (res:any, value:Transaction) {
-                if (value.category){
-                    if (value.category.type == 1 && !res[value.category.id]) {
-                        res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
-                        incomeArr.push(res[value.category.id]);
-                    } else if (value.category.type == -1 && !res[value.category.id]) {
-                        res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
-                        spendingsArr.push(res[value.category.id]);
-                    }
-                    if (res[value.category.id] !== undefined){
-                        res[value.category.id].amount += Number(value.amount);
-                    }
-                }                
-                
-                return res;
-            }, {});
+
+            let mapTrxCategory: { [key: string]: any } = {};
+
+            transactions.forEach((value: Transaction) => {
+                if (!value.category) {
+                    return;
+                }
+                const categoryId = value.category.id;
+
+                // Check if the category type is income (1) or spending (-1) and if it's already in the result
+                if (value.category.type === 1 && !mapTrxCategory[categoryId]) {
+                    mapTrxCategory[categoryId] = { categoryId, categoryName: value.category.name, color: value.category.color, amount: 0 };
+                    incomeArr.push(mapTrxCategory[categoryId]);
+                } else if (value.category.type === -1 && !mapTrxCategory[categoryId]) {
+                    mapTrxCategory[categoryId] = { categoryId, categoryName: value.category.name, color: value.category.color, amount: 0 };
+                    spendingsArr.push(mapTrxCategory[categoryId]);
+                }
+
+                // Increment the amount if the category exists in result
+                if (mapTrxCategory[categoryId]) {
+                    mapTrxCategory[categoryId].amount += Number(value.amount);
+                }
+
+            });
 
             let spendingsChartData: ChartData = { colors: [], data: [], labels: [] };
             let incomeChartData: ChartData = { colors: [], data: [], labels: [] };
@@ -105,11 +112,11 @@ ipcMain.handle("get:dashboard", async () => {
                 incomeChartData.colors.push(obj.color);
             });
 
-            let chartResult:Charts = {
-                period:startOfMonth,
+            let chartResult: Charts = {
+                period: startOfMonth,
                 incomeChart: incomeChartData,
                 spendingChart: spendingsChartData
-            }
+            };
 
             result.chart = chartResult;
         }
@@ -120,55 +127,61 @@ ipcMain.handle("get:dashboard", async () => {
             let totalFund = 0;
             wallets.forEach(function (obj) {
                 totalFund += obj.balance;
-            })
+            });
             result.totalFund = totalFund;
             result.wallets = wallets;
             result.currency = wallets[0].currency;
         }
 
         let firstLastTransactions = await transactionUc.getFirstAndLastTransaction();
-        if (firstLastTransactions)  {
-            
-                result.minDate = new Date(firstLastTransactions[0].transactionDate);
-                result.maxDate = new Date();
-                     
-        }
-        
-        return result;
-    } catch (e:any) {
-        logger.error(e)
-        logger.error(e.stack)
-    }
-})
+        if (firstLastTransactions && firstLastTransactions.length > 0) {
+            result.minDate = new Date(firstLastTransactions[0].transactionDate);
+            result.maxDate = new Date();
 
-ipcMain.handle("get:chart", async (_event,args) => {
+        }
+
+        return result;
+    } catch (e: any) {
+        logger.error(e);
+        logger.error(e.stack);
+    }
+});
+
+ipcMain.handle("get:chart", async (_event, args) => {
     try {
         let req = JSON.parse(args);
         let startDate = new Date(req.startDate);
         let endDate = new Date(req.endDate);
+        endDate.setHours(23,59,59,999);
 
-        let transactions = await transactionUc.getTransactions(startDate, endDate)
+        let transactions = await transactionUc.getTransactions(startDate, endDate);
         if (transactions && !(transactions instanceof Error) && transactions.length > 0) {
 
             let spendingsArr: any[] = [];
             let incomeArr: any[] = [];
-            let trx = transactions.reduce(function (res:any, value:Transaction) {
-                if (value.category){
-                    if (value.category.type == 1 && !res[value.category.id]) {
-                        res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
-                        incomeArr.push(res[value.category.id]);
-                    } else if (value.category.type == -1 && !res[value.category.id]) {
-                        res[value.category.id] = { categoryId: value.category.id, categoryName: value.category.name, color: value.category.color, amount: 0 };
-                        spendingsArr.push(res[value.category.id]);
-                    }
-                    if (res[value.category.id] !== undefined){
-                        res[value.category.id].amount += Number(value.amount);
-                    }
+            let mapTrxCategory: { [key: string]: any } = {};
+
+            transactions.forEach((value: Transaction) => {
+                if (!value.category) {
+                    return;
                 }
-                
-                
-                return res;
-            }, {});
+                const categoryId = value.category.id;
+
+                // Check if the category type is income (1) or spending (-1) and if it's already in the result
+                if (value.category.type === 1 && !mapTrxCategory[categoryId]) {
+                    mapTrxCategory[categoryId] = { categoryId, categoryName: value.category.name, color: value.category.color, amount: 0 };
+                    incomeArr.push(mapTrxCategory[categoryId]);
+                } else if (value.category.type === -1 && !mapTrxCategory[categoryId]) {
+                    mapTrxCategory[categoryId] = { categoryId, categoryName: value.category.name, color: value.category.color, amount: 0 };
+                    spendingsArr.push(mapTrxCategory[categoryId]);
+                }
+
+                // Increment the amount if the category exists in result
+                if (mapTrxCategory[categoryId]) {
+                    mapTrxCategory[categoryId].amount += Number(value.amount);
+                }
+
+            });
 
             let spendingsChartData: ChartData = { colors: [], data: [], labels: [] };
             let incomeChartData: ChartData = { colors: [], data: [], labels: [] };
@@ -184,21 +197,21 @@ ipcMain.handle("get:chart", async (_event,args) => {
                 incomeChartData.colors.push(obj.color);
             });
 
-            let chartResult:Charts = {
-                period:startDate,
+            let chartResult: Charts = {
+                period: startDate,
                 incomeChart: incomeChartData,
                 spendingChart: spendingsChartData
-            }
+            };
 
-            let result:Charts = chartResult;
+            let result: Charts = chartResult;
 
-            return result
+            return result;
         }
     }
-    catch(e) {
-        logger.error(e)
+    catch (e) {
+        logger.error(e);
     }
-})
+});
 
 ipcMain.handle("get:category", (_event, args) => {
     return categoryUc.getCategoryById(args); //args must be uuid string
@@ -214,8 +227,8 @@ ipcMain.handle("get:transaction", (_event, args) => {
 });
 
 ipcMain.handle("get:currency", (_event, args) => {
-    return currencies.currencies.find((obj: any) => { return obj.code == args });
-})
+    return currencies.currencies.find((obj: any) => { return obj.code == args; });
+});
 
 ipcMain.handle("insert:category", (_event, args) => {
     if (args != undefined) {
@@ -258,7 +271,7 @@ ipcMain.handle("update:wallet", (_event, args) => {
 });
 
 ipcMain.handle("update:transaction", (_event, args) => {
-    let req = JSON.parse(args) as Transaction
+    let req = JSON.parse(args) as Transaction;
     return transactionUc.update(req);
 });
 

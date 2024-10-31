@@ -15,7 +15,7 @@ export class WalletRepository implements IWalletRepository {
     getAll(): Promise<Wallet[]> {
         return new Promise((resolve, reject) => {
             try {
-                let data = this.db.getData<Wallet>(this.key)
+                let data = this.db.getData<Wallet>(this.key);
                 resolve(data);
             } catch (error) {
                 reject(error);
