@@ -135,7 +135,6 @@ ipcMain.handle("get:dashboard", async () => {
 
         let firstLastTransactions = await transactionUc.getFirstAndLastTransaction();
         if (firstLastTransactions && firstLastTransactions.length > 0) {
-
             result.minDate = new Date(firstLastTransactions[0].transactionDate);
             result.maxDate = new Date();
 
