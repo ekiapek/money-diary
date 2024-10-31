@@ -8,7 +8,7 @@ import { JsonDB } from "../util/db/json";
 import { logger } from "../util/logging/winston";
 import { ITransactionUsecase } from "./interfaces/ITransactionUsecase";
 
-const Transfer_Category = new Category({ name: "Transfer Money", color: "#275DAD", icon: "🔄", description: "", createdAt: new Date() }, 2)
+const Transfer_Category = new Category({ name: "Transfer Money", color: "#275DAD", icon: "🔄", description: "", createdAt: new Date() }, 2);
 export class TransactionUsecase implements ITransactionUsecase {
     private repo: ITrasactionRepository;
     private walletRepo: IWalletRepository;
@@ -30,10 +30,14 @@ export class TransactionUsecase implements ITransactionUsecase {
         try {
             let result: any = {};
             let trxResponse = await this.getTransactions(from, to, walletId, categoryId);
+            if (!trxResponse || (!(trxResponse instanceof Error) && trxResponse.length < 1)) {
+                let res:Transaction[] = [];
+                return res;
+            }
 
             let transactions = JsonDB.groupBy(trxResponse, (x: Transaction) => x.transactionDate.toLocaleDateString());
 
-            let resultData: any[] = []
+            let resultData: any[] = [];
             let dateKeys = Object.keys(transactions);
 
             dateKeys.forEach((key: string) => {
@@ -54,12 +58,11 @@ export class TransactionUsecase implements ITransactionUsecase {
             }
 
             result["activePeriod"] = from;
-            logger.info(JSON.stringify(result));
 
             return result;
         }
         catch (e:any) {
-            logger.error(e.stack)
+            logger.error(e.stack);
             return Error("Failed to load transactions");
         }
 
@@ -79,14 +82,13 @@ export class TransactionUsecase implements ITransactionUsecase {
                 return [];
             }
 
-
             let trxResponse: any[] = [];
             
             // join the data from wallet and category
             transactions.forEach(function (obj) {
                 let trx: any = { ...obj };   
-                let category = categories ? categories.find((x: Category) => { return x.id == obj.categoryId }):undefined;
-                let wallet = wallets.find((x: Wallet) => { return x.id == obj.walletId })
+                let category = categories ? categories.find((x: Category) => { return x.id == obj.categoryId; }):undefined;
+                let wallet = wallets.find((x: Wallet) => { return x.id == obj.walletId; });
                 trx["wallet"] = wallet;
                 trx["category"] = category;
 
@@ -111,26 +113,27 @@ export class TransactionUsecase implements ITransactionUsecase {
             // filter the data
             if (from !== undefined) {
                 trxResponse = trxResponse.filter((obj: Transaction) => {
-                    return obj.transactionDate.getTime() > from.getTime();
-                })
+                    return obj.transactionDate.getTime() >= from.getTime();
+                });
             }
 
             if (to !== undefined) {
+                to.setHours(23,59,59,999);
                 trxResponse = trxResponse.filter((obj: Transaction) => {
-                    return obj.transactionDate.getTime() < to.getTime();
-                })
+                    return obj.transactionDate.getTime() <= to.getTime();
+                });
             }
 
             if (walletId !== undefined) {
                 trxResponse = trxResponse.filter((obj: Transaction) => {
                     return obj.walletId == walletId;
-                })
+                });
             }
 
             if (categoryId !== undefined) {
                 trxResponse = trxResponse.filter((obj: Transaction) => {
                     return obj.categoryId == categoryId;
-                })
+                });
             }
 
             trxResponse = trxResponse.sort((x: Transaction, y: Transaction) => (x.transactionDate > y.transactionDate ? -1 : 1));
@@ -155,7 +158,7 @@ export class TransactionUsecase implements ITransactionUsecase {
         }
         catch (e) {
             logger.error(e);
-            return false
+            return false;
         }
     }
 
@@ -164,15 +167,15 @@ export class TransactionUsecase implements ITransactionUsecase {
             let wallet = await this.walletRepo.getById(data.walletId);
 
             if (wallet === undefined) {
-                return false
+                return false;
             }
 
             if (data.type == 2 && data.destinationWalletId) {
-                let srcWallet = wallet
+                let srcWallet = wallet;
                 let destWallet = await this.walletRepo.getById(data.destinationWalletId);
 
                 if (srcWallet === undefined || destWallet === undefined) {
-                    return false
+                    return false;
                 }
 
                 srcWallet.balance = Number(srcWallet.balance) - Number(data.amount);
@@ -193,7 +196,7 @@ export class TransactionUsecase implements ITransactionUsecase {
             }
         }
         catch (e) {
-            logger.error(e)
+            logger.error(e);
         }
         return false;
     }
@@ -201,7 +204,7 @@ export class TransactionUsecase implements ITransactionUsecase {
         try {
             let data = await this.repo.getById(id);
             if (data === undefined) {
-                return false
+                return false;
             }
             if (data.type == 2 && data.destinationWalletId) {
                 let srcWallet = await this.walletRepo.getById(data.walletId);
