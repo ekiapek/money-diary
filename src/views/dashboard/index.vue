@@ -156,7 +156,6 @@ export default {
                 this.isLoading = false;
                 this.isLoadingChart = false;
                 if (dashboardData) {
-                    console.log(dashboardData);
                     this.currency = dashboardData.currency ? dashboardData.currency : this.currency;
                     this.totalFunds = formatCurrency(dashboardData.totalFund, this.currency);
                     this.totalIncome = formatCurrency(dashboardData.totalIncome, this.currency);
@@ -175,14 +174,12 @@ export default {
             }).catch((error) => { console.log(error) })
         },
         getChartData(date:Date) {
-            console.log(date);
             this.isLoadingChart = true;
             let startDate:Date = new Date(date.getFullYear(),date.getMonth(),1);
             let endDate:Date = new Date(date.getFullYear(),date.getMonth()+1,0);
             let req:any = JSON.stringify({startDate:startDate,endDate:endDate});            
             window.api.getChart(req).then((data) => {
                 this.isLoadingChart = false;
-                console.log(data);
                 if (data) {
                     this.incomeChart = data.incomeChart;
                     this.spendingsChart = data.spendingChart;
