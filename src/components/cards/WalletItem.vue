@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { Wallet } from "@/types/models/Wallet";
-import { PropType } from "vue";
 import { formatCurrency } from "@/util/currency";
-const props = defineProps({
-    wallet: Wallet as PropType<Wallet>
-});
+const props = defineProps<{
+    wallet?: Wallet,
+}>();
 
 let balance = props.wallet?.balance ?? 0;
 let currency = props.wallet?.currency ?? "USD";

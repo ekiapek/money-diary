@@ -21,7 +21,7 @@
       </v-row>
 
       <v-row class="mb-3 mt-3 px-3 gx-5 flex-nowrap overflow-auto scrolling-month">
-        <div v-for="month in generateMonths(minDate, maxDate)">
+        <div v-for="month in generateMonths(minDate, maxDate)" :key="month.date">
           <v-chip class="mx-1" color="primary" variant="flat"
             v-if="month.date.getFullYear() == activePeriod.getFullYear() && month.date.getMonth() == activePeriod.getMonth()"
             @click.stop="filterMonth(month.date)">{{ month.str }}</v-chip>
@@ -32,7 +32,7 @@
       <v-card v-if="transactions === undefined || transactions.length == 0" elevation="3" class="mb-5 align-top text-center justify-center pa-3">
         <p><i>No transaction found in this month. Start by adding a new transaction.</i></p>
       </v-card>
-      <v-card v-else v-for="data in transactions" elevation="3" class="withbg mb-7">
+      <v-card v-else v-for="data in transactions" elevation="3" :key="data.id" class="withbg mb-7">
         <!-- {{transactions[key]}} -->
         <v-card-item>
           <v-card-title class="text-h5">{{ new Date(data.date).toLocaleDateString(userLocale, dateOption)
@@ -57,7 +57,6 @@
                       <span class="text-h4">{{ item.category.icon }}</span>
                     </v-avatar>
                     <span class="text-subtitle-1 font-weight-bold ml-3">{{ item.category.name }}</span>
-                    <!-- <div class="text-13 mt-1 text-muted">{{ item.post }}</div> -->
                   </div>
                 </td>
                 <td>
@@ -81,7 +80,7 @@
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
-          <p>
+          <p class="ml-2">
             {{ data.transactions.length > 1 ? data.transactions.length + " transactions" : data.transactions.length + " transaction" }}
           </p>
         </v-card-actions>
@@ -151,33 +150,33 @@
               </v-select>
             </div>
 
-            <v-select v-if="transaction.type == 1" v-model="transaction.categoryId" class="mb-4" label="Select Category"
-              variant="outlined" item-value="id" item-title="name" :items="incomeCategories" :rules="[rules.required]"
+            <v-select v-if="transaction.type === 1" v-model="transaction.categoryId" class="mb-4" label="Select Category"
+              variant="outlined" item-value="id" item-title="name" :items="validIncomeCategories" :rules="[rules.required]"
               :menu-props="{ maxHeight: '200px' }">
               <template v-slot:item="{ props, item }">
-                <v-list-item v-bind="props" :title="item?.raw?.name">
+                <v-list-item v-bind="props" :title="item?.raw?.name || 'Unknown Category'">
                   <template v-slot:prepend>
-                    <v-avatar class="text-white" variant="flat" :color="item?.raw?.color">
-                      <span class="text-h4">{{ item?.raw?.icon }}</span>
+                    <v-avatar class="text-white" variant="flat" :color="item?.raw?.color || 'grey'">
+                      <span class="text-h4">{{ item?.raw?.icon || '' }}</span>
                     </v-avatar>
                   </template>
                 </v-list-item>
               </template>
             </v-select>
-            <v-select v-else-if="transaction.type == -1" v-model="transaction.categoryId" class="mb-4"
-              label="Select Category" variant="outlined" item-value="id" item-title="name" :items="spendingCategories"
+            <v-select v-else-if="transaction.type === -1" v-model="transaction.categoryId" class="mb-4"
+              label="Select Category" variant="outlined" item-value="id" item-title="name" :items="validSpendingCategories"
               :rules="[rules.required]" :menu-props="{ maxHeight: '200px' }">
               <template v-slot:item="{ props, item }">
-                <v-list-item v-bind="props" :title="item?.raw?.name">
+                <v-list-item v-bind="props" :title="item?.raw?.name || 'Unknown Category'">
                   <template v-slot:prepend>
-                    <v-avatar class="text-white" variant="flat" :color="item?.raw?.color">
-                      <span class="text-h4">{{ item?.raw?.icon }}</span>
+                    <v-avatar class="text-white" variant="flat" :color="item?.raw?.color || 'grey'">
+                      <span class="text-h4">{{ item?.raw?.icon || '' }}</span>
                     </v-avatar>
                   </template>
                 </v-list-item>
               </template>
             </v-select>
-            <v-select v-else-if="transaction.type == 2" class="mb-4" label="Select Category" variant="outlined"
+            <v-select v-else-if="transaction.type === 2" class="mb-4" label="Select Category" variant="outlined"
               item-disabled="disabled" item-title="name" :items='[]' :menu-props="{ maxHeight: '200px' }" disabled>
               <template v-slot:no-data>
                 <span class="px-4"><i>Please select transaction type</i></span>
@@ -212,23 +211,24 @@
   </v-row>
 </template>
 <script lang="ts">
-import { Transaction } from '../../../types/models/Transaction';
-import { TransactionFilter } from '../../../types/Filter.ts';
-import { Base } from '../../../types/models/Base';
-import { formatCurrency } from '@/util/currency';
-import DatePicker from '@/components/date/DatePicker.vue';
-import MonthPicker from '@/components/date/MonthPicker.vue';
-import Loading from 'vue-loading-overlay';
-import 'vue-loading-overlay/dist/css/index.css';
-import FilterChip from '@/components/shared/FilterChip.vue';
-import CurrencyInput from '@/components/input/CurrencyInput.vue';
-import dayjs from 'dayjs';
-import { generateMonths } from '@/util/monthGenerator';
+import { Transaction } from "@/types/models/Transaction";
+import { Category } from "@/types/models/Category";
+import { Wallet } from "@/types/models/Wallet";
+import { TransactionFilter } from "@/types/Filter.ts";
+import { Base } from "@/types/models/Base";
+import { formatCurrency } from "@/util/currency";
+import DatePicker from "@/components/date/DatePicker.vue";
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/css/index.css";
+import FilterChip from "@/components/shared/FilterChip.vue";
+import CurrencyInput from "@/components/input/CurrencyInput.vue";
+import dayjs from "dayjs";
+import { generateMonths } from "@/util/monthGenerator";
+import UUID from "pure-uuid";
 
 export default {
   components: {
     "DatePicker": DatePicker,
-    "MonthPicker": MonthPicker,
     CurrencyInput,
     Loading,
     FilterChip,
@@ -239,15 +239,15 @@ export default {
       maxDate: new Date(),
       activePeriod: new Date(),
       filter: undefined as TransactionFilter | undefined,
-      currencies: [],
-      categories: [],
-      incomeCategories: [],
-      spendingCategories: [],
-      wallets: [],
-      destWallets: [],
+      currencies: [] as any[],
+      categories: [] as Category[],
+      incomeCategories: [] as Category[],
+      spendingCategories: [] as Category[],
+      wallets: [] as Wallet[],
+      destWallets: [] as Wallet[],
       transactions: undefined as any | undefined,
       transactionDialog: false,
-      transaction: null as Transaction | null,
+      transaction:new Transaction({} as Base, undefined, undefined, undefined, undefined),
       snackbar: false,
       dialogTitle: "",
       snackbarColor: "primary",
@@ -257,10 +257,10 @@ export default {
       currency: { code: "USD" },
       userLocale: navigator.language,
       isLoading: false,
-      dateOption: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
+      dateOption: { weekday: "long", year: "numeric", month: "long", day: "numeric" },
       trxType: [{ name: "Income", type: 1 }, { name: "Spending", type: -1 }, { name: "Transfer Money", type: 2 }],
       rules: {
-        required: value => !!value || "This field is required"
+        required: (value:any) => !!value || "This field is required"
       }
     };
   },
@@ -306,7 +306,7 @@ export default {
           this.activePeriod = response.activePeriod;
         }
       }).catch((error) => {
-        console.log(error)
+        console.log(error);
       });
     },
     addItem() {
@@ -324,7 +324,7 @@ export default {
         this.transactionDialog = true;
         this.transaction = result;
         if (this.transaction == null) {
-          return
+          return;
         }
         this.transaction.transactionDate = dayjs(this.transaction?.transactionDate).toDate();
         this.dialogTitle = "Edit transaction";
@@ -338,16 +338,17 @@ export default {
         .catch(() => {
           this.snackbarColor = "error";
           this.snackbarMsg = "Failed to get transaction.";
-        })
+        });
     },
     saveTransaction() {
       this.$refs.transactionForm.validate().then((result: any) => {
         if (result.valid) {
           if (this.transaction == null) {
-            return
+            return;
           }
-          this.transaction.amount = Number(this.transaction?.amount)
-          if (!this.transaction?.createdAt) {
+          this.transaction.amount = Number(this.transaction.amount);
+          if (this.transaction.id == "") {
+            this.transaction.id = new UUID(4).toString();
             this.transaction.createdAt = new Date();
             window.api.insertTransaction(JSON.stringify(this.transaction)).then((response) => {
               if (response) {
@@ -362,17 +363,16 @@ export default {
               }
             }).catch(() => {
               this.snackbarMsg = "Failed to add transaction";
-              this.snackbarColor = "error"
+              this.snackbarColor = "error";
               this.snackbar = true;
             });
-
           } else {
             window.api.updateTransaction(JSON.stringify(this.transaction)).then((response) => {
               if (response) {
                 this.snackbarMsg = "Successfully edited transaction";
                 this.snackbarColor = "success";
                 this.snackbar = true;
-                this.loadData()
+                this.loadData();
               } else {
                 this.snackbarMsg = "Failed to edit transaction";
                 this.snackbarColor = "error";
@@ -380,11 +380,11 @@ export default {
               }
             }).catch(() => {
               this.snackbarMsg = "Failed to edit transaction";
-              this.snackbarColor = "error"
+              this.snackbarColor = "error";
               this.snackbar = true;
             });
           }
-          this.transactionDialog = false
+          this.transactionDialog = false;
         }
       });
 
@@ -409,11 +409,11 @@ export default {
             this.snackbarColor = "error";
             this.snackbar = true;
           }
-        }).catch((error) => {
+        }).catch(() => {
           this.snackbarMsg = "Failed to delete transaction";
           this.snackbarColor = "error";
           this.snackbar = true;
-        })
+        });
       }
     },
     renderAmountCurrency(walletId: string) {
@@ -421,8 +421,8 @@ export default {
         window.api.getCurrency(wallet.currency).then((response) => {
           this.currencyPrefix = response.symbolNative;
           this.currency = response;
-        })
-      })
+        });
+      });
     },
     filterMonth(date: Date) {
       let startDate: Date = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -431,14 +431,14 @@ export default {
       this.setFilter(filter);
     },
     setFilter(value: TransactionFilter) {
-      let args = JSON.stringify(value)
+      let args = JSON.stringify(value);
       window.api.listTransactions(args).then((response) => {
         if (response) {
           this.transactions = response.data;
           this.activePeriod = response.activePeriod;
         }
       }).catch((error) => {
-        console.log(error)
+        console.log(error);
       });
     },
     populateDestWallet() {
@@ -454,6 +454,36 @@ export default {
       this.renderAmountCurrency(value);
       this.populateDestWallet();
     }
+  },
+  computed: {
+    // Computed property to manage the filtered list of income categories
+    validIncomeCategories() {
+      // Check if the current categoryId exists in incomeCategories
+      const categoryExists = this.incomeCategories.some(
+        (category:any) => category.id === this.transaction.categoryId
+      );
+
+      // If the categoryId is not valid, reset it to null
+      if (!categoryExists) {
+        this.transaction.categoryId = undefined;
+      }
+
+      return this.incomeCategories; // Return the categories as usual
+    },
+    // Computed property to manage the filtered list of spendings categories
+    validSpendingCategories() {
+      // Check if the current categoryId exists in incomeCategories
+      const categoryExists = this.spendingCategories.some(
+        (category:any) => category.id === this.transaction.categoryId
+      );
+
+      // If the categoryId is not valid, reset it to null
+      if (!categoryExists) {
+        this.transaction.categoryId = undefined;
+      }
+
+      return this.spendingCategories; // Return the categories as usual
+    },
   },
 };
 </script>

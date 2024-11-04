@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { Category } from "@/types/models/Category";
-import { PropType } from "vue";
-const props = defineProps({
-    category: Category as PropType<Category>
-});
+const props = defineProps<{
+    category?: Category
+}>();
 </script>
 <template>
     <v-card class="py-3 px-3 d-flex align-center" elevation="3" height="100%">

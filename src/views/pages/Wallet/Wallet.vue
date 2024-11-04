@@ -14,7 +14,7 @@
       <v-container fluid>
         <h3 class="mb-3">Regular Wallets</h3>
         <v-row>
-          <v-col v-if="regularWallets.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+          <v-col v-if="regularWallets.length == 0" class="align-top"><i>No data</i></v-col>
           <v-col v-else v-for="item in regularWallets" :key="item.id" cols="4">
             <WalletItem :wallet="item" @click="editItem(item)" />
           </v-col>
@@ -23,7 +23,7 @@
       <v-container fluid>
         <h3 class="mb-3">Savings Wallets</h3>
         <v-row>
-          <v-col v-if="savingsWallets.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+          <v-col v-if="savingsWallets.length == 0" class="align-top"><i>No data</i></v-col>
           <v-col v-else v-for="item in savingsWallets" :key="item.id" cols="4">
             <WalletItem :wallet="item" @click="editItem(item)" />
           </v-col>
@@ -32,17 +32,12 @@
       <v-container fluid>
         <h3 class="mb-3">Investment Wallets</h3>
         <v-row>
-          <v-col v-if="investmentWallets.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+          <v-col v-if="investmentWallets.length == 0" class="align-top"><i>No data</i></v-col>
           <v-col v-else v-for="item in investmentWallets" :key="item.id" cols="4">
             <WalletItem :wallet="item" @click="editItem(item)" />
           </v-col>
         </v-row>
       </v-container>
-      <!-- <v-card elevation="10" class="">
-        <v-card-item class="pa-0">
-          
-        </v-card-item>
-      </v-card> -->
     </v-col>
 
     <v-dialog v-model="walletDialog" width="600" style="z-index: 2000;">
@@ -51,28 +46,25 @@
           {{ dialogTitle }}
         </v-card-title>
         <v-card-text class="">
+          <v-form ref="walletForm" lazy-validation>
+            <v-text-field v-model="wallet.name" class="mb-4" label="Wallet name" variant="outlined"
+              :rules="[rules.required]"></v-text-field>
+            <v-select v-model="wallet.type" class="mb-4" label="Type" variant="outlined" :items="walletTypes"
+              :rules="[rules.required]"></v-select>
+            <v-autocomplete v-model="wallet.currency" class="mb-4" item-value="code" item-title="name" label="Currency"
+              variant="outlined" :menu-props="{ maxHeight: '200px' }" :items="currencies"
+              :rules="[rules.required]"><template v-slot:item="{ props, item }">
+                <v-list-item v-bind="props" :title="item?.raw?.name"
+                  :subtitle="item?.raw?.symbolNative"></v-list-item></template></v-autocomplete>
+            <CurrencyInput class="mb-4" v-model="wallet.balance" label="Balance" variant="outlined"></CurrencyInput>
+            <v-textarea v-model="wallet.description" label="Description" variant="outlined"></v-textarea>
+          </v-form>
           <v-container>
             <v-row class="mb-3">
               <EmojiPicker :emoji="wallet?.icon" :color=pickerColor @emojiChanged="onChangeEmoji" />
               <ColorPicker class="mx-6" :colorProps="pickerColor" @colorChanged="onChangeColor" />
             </v-row>
           </v-container>
-          <v-form ref="walletForm" lazy-validation>
-            <v-text-field v-model="wallet.name" class="mb-4" label="Wallet name" variant="outlined"
-              :rules="[rules.required]"></v-text-field>
-            <v-select v-model="wallet.type" class="mb-4" label="Type" variant="outlined" :items="walletTypes" :rules="[rules.required]"></v-select>
-            <v-autocomplete v-model="wallet.currency" class="mb-4" item-value="code" item-title="name" label="Currency" variant="outlined"
-              :menu-props="{ maxHeight: '200px' }" :items="currencies" :rules="[rules.required]"
-              ><template v-slot:item="{ props, item }">
-                <v-list-item
-                  v-bind="props"
-                  :title="item?.raw?.name"
-                  :subtitle="item?.raw?.symbolNative"
-                ></v-list-item></template></v-autocomplete>
-            <CurrencyInput class="mb-4" v-model="wallet.balance" label="Balance" variant="outlined"></CurrencyInput >
-            <v-textarea v-model="wallet.description" label="Description" variant="outlined"></v-textarea>
-
-          </v-form>
         </v-card-text>
         <v-card-actions class="pa-5 justify-end">
           <v-btn class="px-5" @click="walletDialog = false" variant="tonal" color="muted">Cancel</v-btn>
@@ -88,12 +80,13 @@
   </v-row>
 </template>
 <script lang="ts">
-import { Wallet,WALLET_TYPE_REGULAR, WALLET_TYPE_SAVINGS, WALLET_TYPE_INVESTMENT } from "../../../types/models/Wallet";
+import { Wallet, WALLET_TYPE_REGULAR, WALLET_TYPE_SAVINGS, WALLET_TYPE_INVESTMENT } from "@/types/models/Wallet";
 import EmojiPicker from "@/components/emoji/EmojiPicker.vue";
 import ColorPicker from "@/components/color/ColorPicker.vue";
 import { formatCurrency } from "@/util/currency";
 import CurrencyInput from "@/components/input/CurrencyInput.vue";
 import WalletItem from "@/components/cards/WalletItem.vue";
+import UUID from "pure-uuid";
 
 export default {
   components: {
@@ -104,13 +97,13 @@ export default {
   },
   data() {
     return {
-      currencies: [],
+      currencies: [] as any[],
       regularWallets: [] as Wallet[],
       savingsWallets: [] as Wallet[],
       investmentWallets: [] as Wallet[],
       walletTypes: [] as string[],
       walletDialog: false,
-      wallet: undefined as Wallet|undefined,
+      wallet: new Wallet({ description: "", createdAt: new Date() }, "", 0, ""),
       snackbar: false,
       dialogTitle: "",
       emojisOutput: "",
@@ -119,7 +112,7 @@ export default {
       snackbarColor: "primary",
       snackbarMsg: "",
       rules: {
-        required: value => !!value || "This field is required"
+        required: (value:any) => !!value || "This field is required"
       }
     };
   },
@@ -130,16 +123,16 @@ export default {
   methods: {
     formatCurrency,
     loadData() {
-      window.api.listWallets().then((response) => {
+      window.api.listWallets().then((response: Wallet[]) => {
         if (response) {
-          response.forEach((item:Wallet) => {
-            if (item.type.toLowerCase() == WALLET_TYPE_REGULAR) {
-              this.regularWallets.push(item);
-            } else if (item.type.toLowerCase() == WALLET_TYPE_SAVINGS) {
-              this.savingsWallets.push(item);
-            } else if (item.type.toLowerCase() == WALLET_TYPE_INVESTMENT) {
-              this.investmentWallets.push(item);
-            }
+          this.regularWallets = response.filter((obj:Wallet) => {
+            return obj.type.toLowerCase() == WALLET_TYPE_REGULAR;
+          });
+          this.savingsWallets = response.filter((obj:Wallet) => {
+            return obj.type.toLowerCase() == WALLET_TYPE_SAVINGS;
+          });
+          this.investmentWallets = response.filter((obj:Wallet) => {
+            return obj.type.toLowerCase() == WALLET_TYPE_INVESTMENT;
           });
         }
       });
@@ -159,7 +152,7 @@ export default {
         value: item.code
       };
     },
-    customFilter(queryText:string, item:any) {
+    customFilter(queryText: string, item: any) {
       const textOne = item.raw.name.toLowerCase();
       const textTwo = item.raw.code.toLowerCase();
       const searchText = queryText.toLowerCase();
@@ -169,30 +162,30 @@ export default {
     },
     addItem() {
       this.walletDialog = true;
-      this.wallet = new Wallet({}, undefined, "", "");
+      this.wallet = new Wallet({ description: "", createdAt: new Date() }, "", 0, "");
       this.dialogTitle = "Add new wallet";
       this.pickerColor = this.generateHex();
     },
-    editItem(item: any) {
+    editItem(item: Wallet) {
       this.wallet = item;
-      this.editedId = item.id;
       this.walletDialog = true;
       this.dialogTitle = "Edit wallet: " + item.name;
-      this.emojiColor = item.color;
-      this.pickerColor = item.color;
+      this.emojiColor = item.color ?? "";
+      this.pickerColor = item.color ?? "";
     },
     saveWallet() {
-      this.$refs.walletForm.validate().then((result) => {
+      this.$refs.walletForm.validate().then((result: any) => {
         if (result.valid) {
-          this.wallet.balance = Number(this.wallet.balance)
-          if (!this.wallet.createdAt) {
+          this.wallet.balance = Number(this.wallet.balance);
+          if (this.wallet.id == "") {
+            this.wallet.id = new UUID(4).toString();
             this.wallet.color = this.pickerColor;
             window.api.insertWallet(JSON.stringify(this.wallet)).then((response) => {
               if (response) {
                 this.snackbarMsg = "Wallet added";
                 this.snackbarColor = "success";
                 this.snackbar = true;
-                this.loadData()
+                this.loadData();
               } else {
                 this.snackbarMsg = "Failed to add wallet";
                 this.snackbarColor = "error";
@@ -200,10 +193,9 @@ export default {
               }
             }).catch(() => {
               this.snackbarMsg = "Failed to add wallet";
-              this.snackbarColor = "error"
+              this.snackbarColor = "error";
               this.snackbar = true;
             });
-
           } else {
             this.wallet.color = this.pickerColor ? this.pickerColor : this.wallet.color;
             window.api.updateWallet(JSON.stringify(this.wallet)).then((response) => {
@@ -229,42 +221,42 @@ export default {
 
     },
     deleteObj() {
-      if (confirm("Delete " + this.wallet.name + " wallet?")) {
+      if (confirm("Delete " + this.wallet.name + " wallet?\nDeleting wallet will also delete transactions made to this wallet. This action cannot be undone.")){
         window.api.deleteWallet(this.wallet.id).then((success) => {
           if (success) {
             this.snackbarMsg = "Deleted Wallet";
             this.snackbarColor = "success";
             this.snackbar = true;
             this.walletDialog = false;
-            this.loadData()
+            this.loadData();
           } else {
             this.snackbarMsg = "Failed to delete wallet";
             this.snackbarColor = "error";
             this.snackbar = true;
           }
-        }).catch((error) => {
+        }).catch(() => {
           this.snackbarMsg = "Failed to delete wallet";
           this.snackbarColor = "error";
           this.snackbar = true;
-        })
+        });
       }
     },
-    onChangeColor(newColor) {
+    onChangeColor(newColor: string) {
       this.pickerColor = newColor;
     },
-    onChangeEmoji(newEmoji) {
+    onChangeEmoji(newEmoji: string) {
       this.wallet.icon = newEmoji;
     },
     generateHex() {
       let letters = "0123456789ABCDEF";
-      let color = '#';
+      let color = "#";
       for (let i = 0; i < 6; i++)
         color += letters[(Math.floor(Math.random() * 16))];
 
       return color;
     },
-    onlyNumberInput(evt) {
-      evt = (evt) ? evt : window.event;
+    onlyNumberInput(evt: any) {
+      evt = (evt) || window.event;
       let expect = evt.target.value.toString() + evt.key.toString();
 
       if (!/^[-+]?[0-9]*\.?[0-9]*$/.test(expect)) {
@@ -273,14 +265,6 @@ export default {
         return true;
       }
     },
-    removeLeadingZero() {
-                    this.wallet.balance = Number(this.wallet.balance).toString();
-                },
-                removeInitialZero(){
-                  if (this.wallet.balance == "0"){
-                    this.wallet.balance = "";
-                  }
-                }
   },
 };
 </script>
