@@ -1,11 +1,10 @@
 <template>
     <v-menu :close-on-content-click="false">
         <template v-slot:activator="{ props }">
-            <v-btn id="btn-emoji" v-if="emoji" v-bind="props" :style="style" >
+            <v-btn id="btn-emoji" v-if="emoji" v-bind="props" :style="style" variant="text" >
                 <h1>{{ emojiData }}</h1>
             </v-btn>
-            <v-btn rounded icon="mdi-emoticon-happy-outline" v-else v-bind="props" variant="tonal" style="color: #b5b5b5;">
-                
+            <v-btn rounded="xl" icon="mdi-emoticon-happy-outline" v-else v-bind="props" variant="tonal" style="color: #b5b5b5;">
             </v-btn>
         </template>
         <Picker :native="true" @select="onEmojiSelect"/>
@@ -49,6 +48,6 @@ export default {
     background-color: var(--color);
     min-width: fit-content;
     border-radius: 50%;
-    height: 64px;
+    height: 72px;
 }
 </style>

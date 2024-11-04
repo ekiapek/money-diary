@@ -130,7 +130,7 @@ ipcMain.handle("get:dashboard", async () => {
             });
             result.totalFund = totalFund;
             result.wallets = wallets;
-            result.currency = wallets[0].currency;
+            result.currency = wallets[0] ? wallets[0].currency : "";
         }
 
         let firstLastTransactions = await transactionUc.getFirstAndLastTransaction();

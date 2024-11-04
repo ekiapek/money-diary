@@ -62,7 +62,7 @@
         <v-row class="pb-5">
             <v-col>   
                 <v-row class="mb-3 mt-3 px-3 gx-5 flex-nowrap overflow-auto scrolling-month">             
-                    <div v-for="month in generateMonths(minDate,maxDate)">
+                    <div v-for="month in generateMonths(minDate,maxDate)" :key="month.date">
                         <v-chip class="mx-1" color="primary" variant="flat" v-if="month.date.getFullYear() == activePeriod.getFullYear() && month.date.getMonth() == activePeriod.getMonth()" @click.stop="getChartData(month.date)">{{month.str}}</v-chip>
                         <v-chip class="mx-1" v-else @click.stop="getChartData(month.date)">{{month.str}}</v-chip>
                     </div>
@@ -114,11 +114,12 @@
     </div>
 </template>
 <script lang="ts">
-import { generateMonths } from '@/util/monthGenerator';
-import { formatCurrency } from '@/util/currency';
-import TransactionsChart from '@/components/dashboard/TransactionsChart.vue';
-import WalletList from '@/components/dashboard/WalletList.vue';
-import RecentTransactions from '@/components/dashboard/RecentTransactions.vue';
+import { generateMonths } from "@/util/monthGenerator";
+import { formatCurrency } from "@/util/currency";
+import TransactionsChart from "@/components/dashboard/TransactionsChart.vue";
+import WalletList from "@/components/dashboard/WalletList.vue";
+import RecentTransactions from "@/components/dashboard/RecentTransactions.vue";
+import { ChartData } from "@/types/models/Dashboard";
 
 export default {
     components: {
@@ -133,18 +134,18 @@ export default {
             totalFunds: "",
             recentTransaction: [],
             wallets: [],
-            incomeChart: undefined,
-            spendingsChart: undefined,
+            incomeChart: undefined as ChartData | undefined,
+            spendingsChart: undefined as ChartData | undefined,
             currency: "USD",
             isLoading: false,
             isLoadingChart: false,
             minDate: new Date(),
             maxDate: new Date(),
             activePeriod: new Date(),
-        }
+        };
     },
     created() {
-        this.loadData()
+        this.loadData();
     },
     methods: {
         generateMonths,
@@ -171,7 +172,7 @@ export default {
                         this.spendingsChart = dashboardData.chart.spendingChart;
                     }
                 }
-            }).catch((error) => { console.log(error) })
+            }).catch((error) => { console.log(error); });
         },
         getChartData(date:Date) {
             this.isLoadingChart = true;
@@ -189,10 +190,10 @@ export default {
                     this.spendingsChart = undefined;
                     this.activePeriod = date;
                 }
-            })
+            });
         }
     }
-}
+};
 </script>
 <style scoped>
 .v-chip.active{

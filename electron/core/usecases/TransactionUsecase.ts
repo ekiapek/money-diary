@@ -1,6 +1,5 @@
 import { Category } from "../models/Category";
-import { Transaction } from "../models/Transaction";
-import { Wallet } from "../models/Wallet";
+import { Transaction, TransactionResponse } from "../models/Transaction";
 import { ICategoryRepository } from "../repositories/interfaces/ICategoryRepository";
 import { ITrasactionRepository } from "../repositories/interfaces/ITransactionRepository";
 import { IWalletRepository } from "../repositories/interfaces/IWalletRepository";
@@ -9,6 +8,7 @@ import { logger } from "../util/logging/winston";
 import { ITransactionUsecase } from "./interfaces/ITransactionUsecase";
 
 const Transfer_Category = new Category({ name: "Transfer Money", color: "#275DAD", icon: "🔄", description: "", createdAt: new Date() }, 2);
+const Uncategorized = new Category({ name: "Uncategorized", color: "#b5b5b5", icon: "", description: "", createdAt: new Date() }, 0); 
 export class TransactionUsecase implements ITransactionUsecase {
     private repo: ITrasactionRepository;
     private walletRepo: IWalletRepository;
@@ -31,9 +31,11 @@ export class TransactionUsecase implements ITransactionUsecase {
             let result: any = {};
             let trxResponse = await this.getTransactions(from, to, walletId, categoryId);
             if (!trxResponse || (!(trxResponse instanceof Error) && trxResponse.length < 1)) {
-                let res:Transaction[] = [];
+                let res: Transaction[] = [];
                 return res;
             }
+
+            console.log(JSON.stringify(trxResponse));
 
             let transactions = JsonDB.groupBy(trxResponse, (x: Transaction) => x.transactionDate.toLocaleDateString());
 
@@ -52,16 +54,16 @@ export class TransactionUsecase implements ITransactionUsecase {
             result["data"] = resultData;
 
             let firstLastTransactions = await this.getFirstAndLastTransaction();
-            if (firstLastTransactions)  {
-                    result["minDate"] = new Date(firstLastTransactions[0].transactionDate);
-                    result["maxDate"] = new Date();
+            if (firstLastTransactions) {
+                result["minDate"] = new Date(firstLastTransactions[0].transactionDate);
+                result["maxDate"] = new Date();
             }
 
             result["activePeriod"] = from;
 
             return result;
         }
-        catch (e:any) {
+        catch (e: any) {
             logger.error(e.stack);
             return Error("Failed to load transactions");
         }
@@ -71,80 +73,88 @@ export class TransactionUsecase implements ITransactionUsecase {
     /**
      * Retrieve all transactions in date range.
     */
-    async getTransactions(from?: Date, to?: Date, walletId?: string, categoryId?: string): Promise<Transaction[] | Error> {
+    async getTransactions(
+        from?: Date,
+        to?: Date,
+        walletId?: string,
+        categoryId?: string
+    ): Promise<Transaction[] | Error> {
         try {
-            // get all required data
-            let transactions = await this.repo.getAll();
-            let categories = await this.categoryRepo.getAll();
-            let wallets = await this.walletRepo.getAll();
+            // Fetch all data concurrently
+            const [transactions, categories, wallets] = await Promise.all([
+                this.repo.getAll(),
+                this.categoryRepo.getAll(),
+                this.walletRepo.getAll()
+            ]);
 
-            if (!transactions) {
-                return [];
-            }
+            if (!transactions) return [];
 
-            let trxResponse: any[] = [];
-            
-            // join the data from wallet and category
-            transactions.forEach(function (obj) {
-                let trx: any = { ...obj };   
-                let category = categories ? categories.find((x: Category) => { return x.id == obj.categoryId; }):undefined;
-                let wallet = wallets.find((x: Wallet) => { return x.id == obj.walletId; });
-                trx["wallet"] = wallet;
-                trx["category"] = category;
-
-                if (obj.type == 2) {
-                    trx["category"] = Transfer_Category;
+            // Enhance transactions with wallet and category data
+            const trxResponse = transactions.map((obj) => {
+                const trx:TransactionResponse = { ...obj };
+                let category = categories?.find((x) => x.id === obj.categoryId);
+                if (!category) {
+                    category = Uncategorized;
+                }
+                
+                const wallet = wallets.find((x) => x.id === obj.walletId);
+                if (!wallet) {
+                    return null;
                 }
 
-                if (typeof trx.createdAt === "string") {
-                    trx.createdAt = new Date(trx.createdAt);
-                }
+                trx.wallet = wallet;
+                trx.category = obj.type === 2 ? Transfer_Category : category;
+                trx.createdAt = new Date(trx.createdAt);
+                trx.transactionDate = trx.transactionDate
+                    ? new Date(trx.transactionDate)
+                    : trx.createdAt;
 
-                if (trx.transactionDate === undefined) {
-                    trx.transactionDate = trx.createdAt;
-                }
-                else if (trx.transactionDate !== undefined && typeof trx.transactionDate === "string") {
-                    trx.transactionDate = new Date(trx.transactionDate);
-                }
+                return trx;
+            }).filter(
+                (val) => !!val
+            );
 
-                trxResponse.push(trx);
-            });
+            // Apply filters
+            let filteredTransactions = trxResponse;
 
-            // filter the data
-            if (from !== undefined) {
-                trxResponse = trxResponse.filter((obj: Transaction) => {
-                    return obj.transactionDate.getTime() >= from.getTime();
-                });
+            if (from) {
+                filteredTransactions = filteredTransactions.filter(
+                    (obj) => obj.transactionDate.getTime() >= from.getTime()
+                );
             }
 
-            if (to !== undefined) {
-                to.setHours(23,59,59,999);
-                trxResponse = trxResponse.filter((obj: Transaction) => {
-                    return obj.transactionDate.getTime() <= to.getTime();
-                });
+            if (to) {
+                const endOfDay = new Date(to);
+                endOfDay.setHours(23, 59, 59, 999);
+                filteredTransactions = filteredTransactions.filter(
+                    (obj) => obj.transactionDate.getTime() <= endOfDay.getTime()
+                );
             }
 
-            if (walletId !== undefined) {
-                trxResponse = trxResponse.filter((obj: Transaction) => {
-                    return obj.walletId == walletId;
-                });
+            if (walletId) {
+                filteredTransactions = filteredTransactions.filter(
+                    (obj) => obj.walletId === walletId
+                );
             }
 
-            if (categoryId !== undefined) {
-                trxResponse = trxResponse.filter((obj: Transaction) => {
-                    return obj.categoryId == categoryId;
-                });
+            if (categoryId) {
+                filteredTransactions = filteredTransactions.filter(
+                    (obj) => obj.categoryId === categoryId
+                );
             }
 
-            trxResponse = trxResponse.sort((x: Transaction, y: Transaction) => (x.transactionDate > y.transactionDate ? -1 : 1));
+            // Sort transactions by date in descending order
+            filteredTransactions.sort((x, y) =>
+                x.transactionDate > y.transactionDate ? -1 : 1
+            );
 
-            return trxResponse;
-        }
-        catch (e:any) {
+            return filteredTransactions;
+        } catch (e: any) {
             logger.error(e.stack);
-            return Error("Failed to load transactions");
+            return new Error("Failed to load transactions");
         }
     }
+
     async getTransactionById(id: string): Promise<Transaction | undefined> {
         return await this.repo.getById(id);
     }
@@ -232,22 +242,22 @@ export class TransactionUsecase implements ITransactionUsecase {
         return false;
     }
     async getFirstAndLastTransaction(): Promise<Transaction[]> {
-        let result:Transaction[] = [];
+        let result: Transaction[] = [];
         try {
             let transactions = await this.repo.getAll();
             if (!transactions || transactions.length < 1) {
                 return result;
             }
-            transactions = transactions.sort((x:Transaction,y:Transaction) => (new Date(x.transactionDate) < new Date(y.transactionDate) ? -1 : 1));
+            transactions = transactions.sort((x: Transaction, y: Transaction) => (new Date(x.transactionDate) < new Date(y.transactionDate) ? -1 : 1));
             if (transactions.length > 2) {
-            result.push(transactions[0]);
-            result.push(transactions[transactions.length - 1]);
+                result.push(transactions[0]);
+                result.push(transactions[transactions.length - 1]);
             } else {
                 result.push(transactions[0]);
                 result.push(transactions[0]);
             }
         } catch (e) {
-            logger.error(e);            
+            logger.error(e);
         }
         return result;
     }

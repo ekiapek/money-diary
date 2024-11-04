@@ -8,13 +8,10 @@ const props = defineProps({
 <template>
     <v-card elevation="3" class="withbg">
         <v-card-item>
-            <div class="d-sm-flex align-center justify-space-between pt-sm-2">
-                <div><v-card-title class="text-h5">My Wallets</v-card-title></div>
-            </div>
+            <v-card-title class="text-h5 pt-sm-2">My Wallets</v-card-title>
             <div class="mt-6">
-
                 <div class="" v-if="props.wallets !== undefined && props.wallets.length > 0">
-                    <v-table >
+                    <v-table>
                         <tbody>
                             <tr v-for="item in props.wallets" :key="item.id">
                                 <td>
@@ -23,7 +20,7 @@ const props = defineProps({
                                             <span class="text-h4">{{ item?.icon }}</span>
                                         </v-avatar>
                                         <span class="text-h5 font-weight-bold ml-3">{{ item?.name }}</span>
-                                       
+
                                     </div>
                                 </td>
                                 <td>
@@ -32,14 +29,13 @@ const props = defineProps({
                                 <td>
                                     <h4>{{ formatCurrency(item?.balance, item?.currency) }}</h4>
                                 </td>
-                                
+
                             </tr>
                         </tbody>
                     </v-table>
                 </div>
-
                 <div v-else>
-                    <v-col class="align-top"><i>No data</i></v-col>
+                    <p><i>No data</i></p>
                 </div>
 
             </div>

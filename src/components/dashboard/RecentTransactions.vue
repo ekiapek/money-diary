@@ -9,7 +9,7 @@ const props = defineProps({
     <v-card elevation="3" class="withbg">
         <v-card-item class="pb-0">
             <v-card-title class="text-h5 pt-sm-2">Recent Transactions</v-card-title>
-            <div class="mb-5">
+            <div class="mb-3">
                 <div class="mt-6">
                 <div class="px-3" v-if="props.transactions !== undefined && props.transactions.length > 0" >
                     <v-table>
