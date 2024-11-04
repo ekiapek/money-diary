@@ -1,4 +1,3 @@
-import UUID from "pure-uuid"
 import { Base } from "./Base";
 
 export class Category{
@@ -21,7 +20,7 @@ export class Category{
         this.icon = base.icon;
         this.color = base.color;
         this.type = type;
-        this.id = base.id?base.id:new UUID(4).toString();
+        this.id = "";
         this.createdAt = base.createdAt;
         this.updatedAt = base.updatedAt;
         this.isDeleted = base.isDeleted;

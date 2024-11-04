@@ -1,4 +1,3 @@
-import UUID from "pure-uuid"
 import { Base } from "./Base";
 
 export class Transaction {
@@ -20,7 +19,7 @@ export class Transaction {
         this.type = type;
         this.walletId = walletId;
         this.categoryId = categoryId;
-        this.id = base.id?base.id:new UUID(4).toString();
+        this.id = "";
         this.createdAt = base.createdAt;
         this.updatedAt = base.updatedAt;
         this.destinationWalletId = destinationWalletId;

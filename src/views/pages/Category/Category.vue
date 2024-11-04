@@ -24,7 +24,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
           </div>
           <v-container fluid>
             <v-row >
-              <v-col v-if="spendings.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+              <v-col v-if="spendings.length == 0" class="align-top ml-3"><i>No data</i></v-col>
               <v-col v-else v-for="cat in spendings" :key="cat.id" cols="3">
                 <CategoryItem :category="cat" @click="editItem(cat)" />
               </v-col>
@@ -54,7 +54,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
           </div>
           <v-container fluid>
             <v-row>
-              <v-col v-if="income.length == 0" class="align-top text-center justify-center"><i>No data</i></v-col>
+              <v-col v-if="income.length == 0" class="align-top ml-3"><i>No data</i></v-col>
               <v-col v-else v-for="cat in income" :key="cat.id" cols="3">
                 <CategoryItem :category="cat" @click="editItem(cat)" />
               </v-col>
@@ -70,17 +70,17 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
           {{ dialogTitle }}
         </v-card-title>
         <v-card-text class="">
+          <v-form ref="sendForm" v-model="valid" lazy-validation>
+            <v-text-field v-model="category.name" class="mb-4" label="Category name" variant="outlined"
+              :rules="[rules.required]"></v-text-field>
+            <v-textarea v-model="category.description" label="Description" variant="outlined"></v-textarea>
+          </v-form>
           <v-container>
             <v-row class="mb-3">
               <EmojiPicker :emoji="category.icon" :color=pickerColor @emojiChanged="onChangeEmoji" />
               <ColorPicker class="mx-6" :colorProps="pickerColor" @colorChanged="onChangeColor" />
             </v-row>
           </v-container>
-          <v-form ref="sendForm" v-model="valid" lazy-validation>
-            <v-text-field v-model="category.name" class="mb-4" label="Category name" variant="outlined"
-              :rules="[rules.required]"></v-text-field>
-            <v-textarea v-model="category.description" label="Description" variant="outlined"></v-textarea>
-          </v-form>
         </v-card-text>
         <v-card-actions class="pa-5 justify-end">
           <v-btn class="px-5" @click="categoryDialog = false" variant="tonal" color="muted">Cancel</v-btn>
@@ -97,10 +97,11 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F2F6FA", en
   </v-row>
 </template>
 <script lang="ts">
-import { Category } from '../../../../electron/core/models/Category';
-import EmojiPicker from '@/components/emoji/EmojiPicker.vue';
-import ColorPicker from '@/components/color/ColorPicker.vue';
-import CategoryItem from '@/components/cards/CategoryItem.vue';
+import { Category } from "@/types/models/Category";
+import EmojiPicker from "@/components/emoji/EmojiPicker.vue";
+import ColorPicker from "@/components/color/ColorPicker.vue";
+import CategoryItem from "@/components/cards/CategoryItem.vue";
+import UUID from "pure-uuid";
 
 export default {
   components: {
@@ -110,10 +111,10 @@ export default {
   },
   data() {
     return {
-      spendings: [],
-      income: [],
+      spendings: [] as Category[],
+      income: [] as Category[],
       categoryDialog: false,
-      category: null,
+      category: new Category({description:"",createdAt: new Date()}, -1),
       valid: true,
       snackbar: false,
       dialogTitle: "",
@@ -123,8 +124,7 @@ export default {
       snackbarColor: "primary",
       snackbarMsg: "",
       rules: {
-        required: value => !!value || "This field is required",
-        email: v => /.+@.+\..+/.test(v) || "Must be a valid email"
+        required: (value:any) => !!value || "This field is required",
       }
     };
   },
@@ -133,21 +133,20 @@ export default {
   },
   methods: {
     loadData() {
-      window.api.listCategories().then((response) => {
+      window.api.listCategories().then((response: Category[]) => {
         if (response) {
-          this.spendings = response.filter((obj) => {
+          this.spendings = response.filter((obj:Category) => {
             return obj.type == -1;
           });
-          this.income = response.filter((obj) => {
+          this.income = response.filter((obj:Category) => {
             return obj.type == 1;
           });
         }
       });
     },
-    addItem(type) {
-      this.dialog = true;
+    addItem(type:number) {
       this.categoryDialog = true;
-      this.category = new Category({}, type);
+      this.category = new Category({createdAt: new Date(), description:""}, type);
       if (type == 1) {
         this.dialogTitle = "Add new Income Category";
       } else {
@@ -157,24 +156,23 @@ export default {
     },
     editItem(item: any) {
       this.category = item;
-      this.editedId = item.id;
-      this.dialog = true;
       this.categoryDialog = true;
       this.dialogTitle = "Edit category: " + item.name;
       this.emojiColor = item.color;
       this.pickerColor = item.color;
     },
     save() {
-      this.$refs.sendForm.validate().then((result) => {
+      this.$refs.sendForm.validate().then((result:any) => {
         if (result.valid) {
-          if (!this.category.createdAt) {
+          if (this.category.id == "") {
+            this.category.id = new UUID(4).toString();
             this.category.color = this.pickerColor;
             window.api.insertCategory(JSON.stringify(this.category)).then((response) => {
               if (response) {
                 this.snackbarMsg = "Category added";
                 this.snackbarColor = "success";
                 this.snackbar = true;
-                this.loadData()
+                this.loadData();
               } else {
                 this.snackbarMsg = "Failed to add category";
                 this.snackbarColor = "error";
@@ -182,10 +180,9 @@ export default {
               }
             }).catch(() => {
               this.snackbarMsg = "Failed to add category";
-              this.snackbarColor = "error"
+              this.snackbarColor = "error";
               this.snackbar = true;
             });
-
           } else {
             this.category.color = this.pickerColor ? this.pickerColor : this.category.color;
             window.api.updateCategory(JSON.stringify(this.category)).then((response) => {
@@ -193,7 +190,7 @@ export default {
                 this.snackbarMsg = "Successfully edited category";
                 this.snackbarColor = "success";
                 this.snackbar = true;
-                this.loadData()
+                this.loadData();
               } else {
                 this.snackbarMsg = "Failed to edit category";
                 this.snackbarColor = "error";
@@ -201,11 +198,11 @@ export default {
               }
             }).catch(() => {
               this.snackbarMsg = "Failed to edit category";
-              this.snackbarColor = "error"
+              this.snackbarColor = "error";
               this.snackbar = true;
             });
           }
-          this.categoryDialog = false
+          this.categoryDialog = false;
         }
       });
     },
@@ -217,28 +214,28 @@ export default {
             this.snackbarColor = "success";
             this.snackbar = true;
             this.categoryDialog = false;
-            this.loadData()
+            this.loadData();
           } else {
             this.snackbarMsg = "Failed to delete category";
             this.snackbarColor = "error";
             this.snackbar = true;
           }
-        }).catch((error) => {
+        }).catch(() => {
           this.snackbarMsg = "Failed to delete category";
           this.snackbarColor = "error";
           this.snackbar = true;
-        })
+        });
       }
     },
-    onChangeColor(newColor) {
+    onChangeColor(newColor:string) {
       this.pickerColor = newColor;
     },
-    onChangeEmoji(newEmoji) {
+    onChangeEmoji(newEmoji:string) {
       this.category.icon = newEmoji;
     },
     generateHex() {
       let letters = "0123456789ABCDEF";
-      let color = '#';
+      let color = "#";
       for (let i = 0; i < 6; i++)
         color += letters[(Math.floor(Math.random() * 16))];
 

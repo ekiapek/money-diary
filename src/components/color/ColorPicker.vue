@@ -10,7 +10,6 @@
                 </v-card-text>
             </v-card>
         </v-menu>
-        <input class="mx-3" v-model="color" disabled />
     </v-row>
 </template>
 <script lang="ts">
