@@ -35,8 +35,6 @@ export class TransactionUsecase implements ITransactionUsecase {
                 return res;
             }
 
-            console.log(JSON.stringify(trxResponse));
-
             let transactions = JsonDB.groupBy(trxResponse, (x: Transaction) => x.transactionDate.toLocaleDateString());
 
             let resultData: any[] = [];
