@@ -79,192 +79,138 @@
     </v-snackbar>
   </v-row>
 </template>
-<script lang="ts">
+<script setup lang="ts">
+import { ref, reactive, onMounted } from "vue";
 import { Wallet, WALLET_TYPE_REGULAR, WALLET_TYPE_SAVINGS, WALLET_TYPE_INVESTMENT } from "@/types/models/Wallet";
 import EmojiPicker from "@/components/emoji/EmojiPicker.vue";
 import ColorPicker from "@/components/color/ColorPicker.vue";
-import { formatCurrency } from "@/util/currency";
 import CurrencyInput from "@/components/input/CurrencyInput.vue";
 import WalletItem from "@/components/cards/WalletItem.vue";
 import UUID from "pure-uuid";
 
-export default {
-  components: {
-    "EmojiPicker": EmojiPicker,
-    "ColorPicker": ColorPicker,
-    "WalletItem": WalletItem,
-    CurrencyInput,
-  },
-  data() {
-    return {
-      currencies: [] as any[],
-      regularWallets: [] as Wallet[],
-      savingsWallets: [] as Wallet[],
-      investmentWallets: [] as Wallet[],
-      walletTypes: [] as string[],
-      walletDialog: false,
-      wallet: new Wallet({ description: "", createdAt: new Date() }, "", 0, ""),
-      snackbar: false,
-      dialogTitle: "",
-      emojisOutput: "",
-      emojiColor: "",
-      pickerColor: "",
-      snackbarColor: "primary",
-      snackbarMsg: "",
-      rules: {
-        required: (value:any) => !!value || "This field is required"
-      }
-    };
-  },
-  created() {
-    this.loadData();
-    this.loadCurrencies();
-  },
-  methods: {
-    formatCurrency,
-    loadData() {
-      window.api.listWallets().then((response: Wallet[]) => {
-        if (response) {
-          this.regularWallets = response.filter((obj:Wallet) => {
-            return obj.type.toLowerCase() == WALLET_TYPE_REGULAR;
-          });
-          this.savingsWallets = response.filter((obj:Wallet) => {
-            return obj.type.toLowerCase() == WALLET_TYPE_SAVINGS;
-          });
-          this.investmentWallets = response.filter((obj:Wallet) => {
-            return obj.type.toLowerCase() == WALLET_TYPE_INVESTMENT;
-          });
-        }
-      });
-      window.api.listWalletTypes().then((response) => {
-        this.walletTypes = response;
-      });
-    },
-    loadCurrencies() {
-      window.api.listCurrencies().then((response) => {
-        this.currencies = response;
-      });
-    },
-    populateSelectCurrencies(item: any) {
-      return {
-        title: item.name + " (" + item.code + ")",
-        subtitle: item.symbol,
-        value: item.code
-      };
-    },
-    customFilter(queryText: string, item: any) {
-      const textOne = item.raw.name.toLowerCase();
-      const textTwo = item.raw.code.toLowerCase();
-      const searchText = queryText.toLowerCase();
+// State
+const currencies = ref<any[]>([]);
+const regularWallets = ref<Wallet[]>([]);
+const savingsWallets = ref<Wallet[]>([]);
+const investmentWallets = ref<Wallet[]>([]);
+const walletTypes = ref<string[]>([]);
+const walletDialog = ref(false);
+const wallet = ref(new Wallet({ description: "", createdAt: new Date() }, "", 0, ""));
+const snackbar = ref(false);
+const dialogTitle = ref("");
+const emojiColor = ref("");
+const pickerColor = ref("");
+const snackbarColor = ref("primary");
+const snackbarMsg = ref("");
+const rules = reactive({
+  required: (value: any) => !!value || "This field is required",
+});
+const walletForm =  ref<null | any>(null);
 
-      return textOne.indexOf(searchText) > -1 ||
-        textTwo.indexOf(searchText) > -1;
-    },
-    addItem() {
-      this.walletDialog = true;
-      this.wallet = new Wallet({ description: "", createdAt: new Date() }, "", 0, "");
-      this.dialogTitle = "Add new wallet";
-      this.pickerColor = this.generateHex();
-    },
-    editItem(item: Wallet) {
-      this.wallet = item;
-      this.walletDialog = true;
-      this.dialogTitle = "Edit wallet: " + item.name;
-      this.emojiColor = item.color ?? "";
-      this.pickerColor = item.color ?? "";
-    },
-    saveWallet() {
-      this.$refs.walletForm.validate().then((result: any) => {
-        if (result.valid) {
-          this.wallet.balance = Number(this.wallet.balance);
-          if (this.wallet.id == "") {
-            this.wallet.id = new UUID(4).toString();
-            this.wallet.color = this.pickerColor;
-            window.api.insertWallet(JSON.stringify(this.wallet)).then((response) => {
-              if (response) {
-                this.snackbarMsg = "Wallet added";
-                this.snackbarColor = "success";
-                this.snackbar = true;
-                this.loadData();
-              } else {
-                this.snackbarMsg = "Failed to add wallet";
-                this.snackbarColor = "error";
-                this.snackbar = true;
-              }
-            }).catch(() => {
-              this.snackbarMsg = "Failed to add wallet";
-              this.snackbarColor = "error";
-              this.snackbar = true;
-            });
-          } else {
-            this.wallet.color = this.pickerColor ? this.pickerColor : this.wallet.color;
-            window.api.updateWallet(JSON.stringify(this.wallet)).then((response) => {
-              if (response) {
-                this.snackbarMsg = "Successfully edited wallet";
-                this.snackbarColor = "success";
-                this.snackbar = true;
-                this.loadData();
-              } else {
-                this.snackbarMsg = "Failed to edit wallet";
-                this.snackbarColor = "error";
-                this.snackbar = true;
-              }
-            }).catch(() => {
-              this.snackbarMsg = "Failed to edit wallet";
-              this.snackbarColor = "error";
-              this.snackbar = true;
-            });
-          }
-          this.walletDialog = false;
-        }
-      });
-
-    },
-    deleteObj() {
-      if (confirm("Delete " + this.wallet.name + " wallet?\nDeleting wallet will also delete transactions made to this wallet. This action cannot be undone.")){
-        window.api.deleteWallet(this.wallet.id).then((success) => {
-          if (success) {
-            this.snackbarMsg = "Deleted Wallet";
-            this.snackbarColor = "success";
-            this.snackbar = true;
-            this.walletDialog = false;
-            this.loadData();
-          } else {
-            this.snackbarMsg = "Failed to delete wallet";
-            this.snackbarColor = "error";
-            this.snackbar = true;
-          }
-        }).catch(() => {
-          this.snackbarMsg = "Failed to delete wallet";
-          this.snackbarColor = "error";
-          this.snackbar = true;
-        });
-      }
-    },
-    onChangeColor(newColor: string) {
-      this.pickerColor = newColor;
-    },
-    onChangeEmoji(newEmoji: string) {
-      this.wallet.icon = newEmoji;
-    },
-    generateHex() {
-      let letters = "0123456789ABCDEF";
-      let color = "#";
-      for (let i = 0; i < 6; i++)
-        color += letters[(Math.floor(Math.random() * 16))];
-
-      return color;
-    },
-    onlyNumberInput(evt: any) {
-      evt = (evt) || window.event;
-      let expect = evt.target.value.toString() + evt.key.toString();
-
-      if (!/^[-+]?[0-9]*\.?[0-9]*$/.test(expect)) {
-        evt.preventDefault();
-      } else {
-        return true;
-      }
-    },
-  },
+// Methods
+const loadData = async () => {
+  try {
+    const response: Wallet[] = await window.api.listWallets();
+    if (response) {
+      regularWallets.value = response.filter((obj: Wallet) => obj.type.toLowerCase() === WALLET_TYPE_REGULAR);
+      savingsWallets.value = response.filter((obj: Wallet) => obj.type.toLowerCase() === WALLET_TYPE_SAVINGS);
+      investmentWallets.value = response.filter((obj: Wallet) => obj.type.toLowerCase() === WALLET_TYPE_INVESTMENT);
+    }
+    const walletTypesResponse = await window.api.listWalletTypes();
+    walletTypes.value = walletTypesResponse;
+  } catch (error) {
+    console.error("Error loading data:", error);
+  }
 };
+
+const loadCurrencies = async () => {
+  try {
+    const response = await window.api.listCurrencies();
+    currencies.value = response;
+  } catch (error) {
+    console.error("Error loading currencies:", error);
+  }
+};
+
+const addItem = () => {
+  walletDialog.value = true;
+  wallet.value = new Wallet({ description: "", createdAt: new Date() }, "", 0, "");
+  dialogTitle.value = "Add new wallet";
+  pickerColor.value = generateHex();
+};
+
+const editItem = (item: Wallet) => {
+  wallet.value = item;
+  walletDialog.value = true;
+  dialogTitle.value = `Edit wallet: ${item.name}`;
+  emojiColor.value = item.color ?? "";
+  pickerColor.value = item.color ?? "";
+};
+
+const saveWallet = async () => {
+  const formRef = walletForm.value;
+  if (formRef) {
+    formRef.validate().then(async (result: any) => {
+      if (result.valid) {
+        wallet.value.balance = Number(wallet.value.balance);
+        try {
+          if (!wallet.value.id) {
+            wallet.value.id = new UUID(4).toString();
+            wallet.value.color = pickerColor.value;
+            const response = await window.api.insertWallet(JSON.stringify(wallet.value));
+            handleSnackbar(response, "Wallet added", "Failed to add wallet");
+          } else {
+            wallet.value.color = pickerColor.value || wallet.value.color;
+            const response = await window.api.updateWallet(JSON.stringify(wallet.value));
+            handleSnackbar(response, "Successfully edited wallet", "Failed to edit wallet");
+          }
+          walletDialog.value = false;
+          await loadData();
+        } catch {
+          handleSnackbar(false, "", "Failed to save wallet");
+        }
+      }
+    });
+  }
+};
+
+const deleteObj = async () => {
+  if (confirm(`Delete ${wallet.value.name} wallet?\nDeleting wallet will also delete transactions made to this wallet. This action cannot be undone.`)) {
+    try {
+      const success = await window.api.deleteWallet(wallet.value.id);
+      handleSnackbar(success, "Deleted Wallet", "Failed to delete wallet");
+      walletDialog.value = false;
+      await loadData();
+    } catch {
+      handleSnackbar(false, "", "Failed to delete wallet");
+    }
+  }
+};
+
+const handleSnackbar = (success: boolean, successMsg: string, errorMsg: string) => {
+  snackbarMsg.value = success ? successMsg : errorMsg;
+  snackbarColor.value = success ? "success" : "error";
+  snackbar.value = true;
+};
+
+const onChangeColor = (newColor: string) => {
+  pickerColor.value = newColor;
+};
+
+const onChangeEmoji = (newEmoji: string) => {
+  wallet.value.icon = newEmoji;
+};
+
+const generateHex = () => {
+  let letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) color += letters[Math.floor(Math.random() * 16)];
+  return color;
+};
+
+// Lifecycle hook
+onMounted(() => {
+  loadData();
+  loadCurrencies();
+});
 </script>

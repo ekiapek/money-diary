@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { Wallet } from "@/types/models/Wallet";
 import { formatCurrency } from "@/util/currency";
+import { ref,watch } from "vue";
 const props = defineProps<{
     wallet?: Wallet,
 }>();
 
-let balance = props.wallet?.balance ?? 0;
-let currency = props.wallet?.currency ?? "USD";
+const balance = ref(props.wallet?.balance ?? 0);
+const currency = ref(props.wallet?.currency ?? "USD");
+
+watch(() => props.wallet, (newVal) => {
+  balance.value = newVal?.balance ?? 0;
+  currency.value = newVal?.currency ?? "USD";
+}, { immediate: true });
+
 </script>
 <template>
     <v-card class="py-3 pr-3 d-flex align-center" elevation="3" height="100%">
