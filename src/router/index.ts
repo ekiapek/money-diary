@@ -4,10 +4,6 @@ import MainRoutes from "./MainRoutes";
 export const router = createRouter({
     history: import.meta.env.PROD ? createWebHashHistory(import.meta.env.BASE_URL) : createWebHistory(import.meta.env.BASE_URL),
     routes: [
-        {
-            path: "/:pathMatch(.*)*",
-            component: () => import("@/views/pages/Error404.vue")
-        },
         MainRoutes,
     ]
 });
