@@ -12,11 +12,6 @@ const MainRoutes = {
             component: () => import("@/views/dashboard/index.vue"),
         },
         {
-            name: "Icons",
-            path: "/icons",
-            component: () => import("@/views/pages/Icons.vue")
-        },
-        {
             name: "Category",
             path: "/category",
             component: () => import("@/views/pages/Category/Category.vue")
